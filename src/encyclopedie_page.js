@@ -1,6 +1,6 @@
 /**
  * Contrôleur JavaScript de la Grande Encyclopédie des Sports de Combat & Arts Martiaux
- * Inclut la modale d'illustration visuelle pour :
+ * Inclut l'affichage des images réelles issues d'Internet et des schémas biomécaniques pour :
  * - Frappes Fondamentales
  * - Clinch Et Projections
  * - Défenses Et Blocages
@@ -33,6 +33,7 @@ export class GrandEncyclopediaApp {
 
     this.currentData = [...ENCYCLOPEDIE_DATA];
     this.currentDiscipline = null;
+    this.currentTechVisualData = null;
 
     this.init();
   }
@@ -49,12 +50,12 @@ export class GrandEncyclopediaApp {
       this.categorySelect.addEventListener('change', () => this.filterData());
     }
 
-    // Gestion de la fermeture de la modale principale
+    // Fermeture de la modale principale
     document.getElementById('closeDisciplineModalBtn')?.addEventListener('click', () => {
       this.closeModal();
     });
 
-    // Gestion de la fermeture de la modale d'illustration
+    // Fermeture de la modale d'illustration
     document.getElementById('closeTechVisualBtn')?.addEventListener('click', () => {
       this.closeTechModal();
     });
@@ -63,11 +64,11 @@ export class GrandEncyclopediaApp {
     });
 
     // Onglets Schéma Vectoriel / Image Réelle
-    this.tabVectorSvgBtn?.addEventListener('click', () => {
-      this.switchVisualTab('svg');
-    });
     this.tabRealImgBtn?.addEventListener('click', () => {
       this.switchVisualTab('real');
+    });
+    this.tabVectorSvgBtn?.addEventListener('click', () => {
+      this.switchVisualTab('svg');
     });
 
     window.addEventListener('keydown', (e) => {
@@ -144,7 +145,6 @@ export class GrandEncyclopediaApp {
       const card = document.createElement('article');
       card.className = 'p-5 sm:p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between space-y-4 hover:shadow-cyan-500/10 hover:-translate-y-1';
 
-      // Calcul du nombre total de techniques cataloguées pour cette discipline
       let totalTechs = 0;
       if (item.noms_et_techniques) {
         for (const k in item.noms_et_techniques) {
@@ -154,7 +154,6 @@ export class GrandEncyclopediaApp {
 
       card.innerHTML = `
         <div class="space-y-3">
-          <!-- En-tête de carte -->
           <div class="flex items-start justify-between gap-3">
             <div>
               <div class="flex items-center gap-2">
@@ -169,12 +168,10 @@ export class GrandEncyclopediaApp {
             </span>
           </div>
 
-          <!-- Résumé historique -->
           <p class="text-xs text-slate-300 line-clamp-3 leading-relaxed">
             ${item.historique}
           </p>
 
-          <!-- Badges points forts et nombre de techniques -->
           <div class="pt-2 border-t border-slate-800/80 flex flex-wrap items-center gap-2 text-[11px] font-mono">
             <span class="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/30">
               ✓ ${item.points_forts.length} Points Forts
@@ -188,9 +185,8 @@ export class GrandEncyclopediaApp {
           </div>
         </div>
 
-        <!-- Bouton d'ouverture détaillée -->
         <button data-id="${item.id}" class="open-detail-btn w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-slate-950 font-bold font-hud text-xs transition flex items-center justify-center gap-2 shadow-lg active:scale-98">
-          <span>📖</span> Consulter le Dossier Complet & Techniques →
+          <span>📖</span> Consulter le Dossier & Techniques Illustrées →
         </button>
       `;
 
@@ -216,16 +212,12 @@ export class GrandEncyclopediaApp {
     document.getElementById('modalTitle').innerText = item.nom;
     document.getElementById('modalOriginalTitle').innerText = `${item.nom_original} • Origine : ${item.origine_pays} (${item.siecle_apparition})`;
 
-    // Maîtres et fondateurs
     const mastersEl = document.getElementById('modalMasters');
     if (mastersEl) {
       mastersEl.innerText = item.fondateurs_maitres.join(' • ');
     }
 
-    // Historique complet
     document.getElementById('modalHistoryText').innerText = item.historique;
-
-    // Philosophie et biomécanique
     document.getElementById('modalPhilosophyText').innerText = item.philosophie_et_biomecanique;
 
     // Points forts
@@ -248,7 +240,7 @@ export class GrandEncyclopediaApp {
       weaknessesUl.appendChild(li);
     });
 
-    // Nomenclature et techniques exhaustives cliquables
+    // Nomenclature et techniques exhaustives avec vignettes & cliquables
     const techsContainer = document.getElementById('modalTechniquesContainer');
     techsContainer.innerHTML = '';
 
@@ -257,49 +249,63 @@ export class GrandEncyclopediaApp {
       if (!Array.isArray(techList) || techList.length === 0) continue;
 
       const catBox = document.createElement('div');
-      catBox.className = 'p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2';
+      catBox.className = 'p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5';
 
-      // Titre convivial de la sous-famille
       const friendlyTitle = categoryName
         .replace(/_/g, ' ')
         .replace(/\b\w/g, l => l.toUpperCase());
 
       catBox.innerHTML = `
-        <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
           <h5 class="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
             <span>🥋</span> ${friendlyTitle} (${techList.length})
           </h5>
-          <span class="text-[10px] font-mono text-slate-500 italic">Cliquez sur un élément pour voir l'image</span>
+          <span class="text-[10px] font-mono text-cyan-300/80 font-semibold flex items-center gap-1">
+            <span>📷</span> Cliquez pour afficher l'image réelle
+          </span>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           ${techList.map((t, idx) => {
             const family = TechniqueVisualEngine.detectFamily(categoryName, t);
+            const webImg = TechniqueVisualEngine.getRealWebImage(categoryName, t);
+
             let badgeColor = 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
-            let badgeLabel = 'Frappe Fondamentale';
+            let badgeLabel = 'Frappes Fondamentales';
             let badgeIcon = '🥊';
 
             if (family === 'clinch_projection') {
               badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-              badgeLabel = 'Clinch & Projection';
+              badgeLabel = 'Clinch & Projections';
               badgeIcon = '🤼';
             } else if (family === 'defense_blocage') {
               badgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-              badgeLabel = 'Défense & Blocage';
+              badgeLabel = 'Défenses & Blocages';
               badgeIcon = '🛡️';
             }
 
             return `
-              <button type="button" data-cat="${categoryName}" data-idx="${idx}" class="tech-card-btn text-left p-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-cyan-400 hover:bg-slate-850 transition-all duration-200 space-y-1.5 shadow group cursor-pointer active:scale-[0.98]">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="font-bold text-xs text-white font-hud group-hover:text-cyan-300 transition">${t.nom}</span>
+              <button type="button" data-cat="${categoryName}" data-idx="${idx}" class="tech-card-btn text-left p-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-cyan-400 hover:bg-slate-850 transition-all duration-200 space-y-2 shadow group cursor-pointer active:scale-[0.98]">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="space-y-0.5">
+                    <span class="font-bold text-xs text-white font-hud group-hover:text-cyan-300 transition block">${t.nom}</span>
+                    ${t.trad ? `<span class="text-[10px] font-mono text-cyan-300/80 italic block">${t.trad}</span>` : ''}
+                  </div>
                   <span class="text-[9px] font-mono px-2 py-0.5 rounded border ${badgeColor} font-bold flex items-center gap-1 shrink-0">
                     <span>${badgeIcon}</span> <span>${badgeLabel}</span>
                   </span>
                 </div>
-                ${t.trad ? `<div class="text-[10px] font-mono text-cyan-300/80 italic">${t.trad}</div>` : ''}
-                <p class="text-[11px] text-slate-400 leading-snug line-clamp-2">${t.desc || ''}</p>
+
+                <!-- Aperçu visuel miniature -->
+                <div class="flex items-center gap-2.5 p-1.5 rounded-xl bg-slate-950/80 border border-slate-800/80">
+                  <img src="${webImg.path}" alt="${t.nom}" class="w-14 h-12 object-cover rounded-lg border border-slate-700/80 shrink-0 group-hover:scale-105 transition" loading="lazy">
+                  <div class="flex-1 min-w-0">
+                    <p class="text-[11px] text-slate-300 leading-snug line-clamp-2">${t.desc || ''}</p>
+                    <span class="text-[9px] font-mono text-slate-500 truncate block mt-0.5">Source : ${webImg.source.split('/')[0]}</span>
+                  </div>
+                </div>
+
                 <div class="pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-cyan-400 group-hover:text-cyan-300">
-                  <span class="flex items-center gap-1 font-semibold"><span>👁️</span> Voir l'image biomécanique</span>
+                  <span class="flex items-center gap-1 font-bold"><span>📷</span> Voir l'image grand écran & biomécanique</span>
                   <span class="transform group-hover:translate-x-1 transition font-bold">→</span>
                 </div>
               </button>
@@ -311,9 +317,9 @@ export class GrandEncyclopediaApp {
       techsContainer.appendChild(catBox);
     }
 
-    // Écouteurs de clic sur chaque élément de technique pour ouvrir l'image biomécanique
+    // Écouteurs de clic sur chaque élément de technique pour ouvrir l'image
     techsContainer.querySelectorAll('.tech-card-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         const cat = btn.getAttribute('data-cat');
         const idx = parseInt(btn.getAttribute('data-idx'), 10);
         const techList = item.noms_et_techniques[cat];
@@ -331,9 +337,10 @@ export class GrandEncyclopediaApp {
     if (!this.techModal || !tech) return;
 
     const family = TechniqueVisualEngine.detectFamily(categoryName, tech);
-    const realImg = TechniqueVisualEngine.getRealImagePath(tech);
+    const webImg = TechniqueVisualEngine.getRealWebImage(categoryName, tech);
+    this.currentTechVisualData = { categoryName, tech, discipline, family, webImg };
 
-    // Badges et titres
+    // Badges de famille
     if (family === 'clinch_projection') {
       this.techFamilyBadge.className = 'text-[10px] sm:text-xs font-mono px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
       this.techFamilyBadge.innerText = '🤼 CLINCH ET PROJECTIONS';
@@ -377,36 +384,51 @@ export class GrandEncyclopediaApp {
       if (vigilance) vigilance.innerText = "Maintenir le poing opposé collé à la mâchoire et ramener le membre immédiatement après impact.";
     }
 
-    // Rendu du SVG
+    // Chargement de l'image réelle issue du web
+    if (this.techRealImgEl) {
+      this.techRealImgEl.src = webImg.path;
+      this.techRealImgCaption.innerHTML = `
+        <span class="text-cyan-300 font-bold">${webImg.title}</span><br>
+        <span class="text-slate-500">Source : ${webImg.source}</span>
+      `;
+    }
+
+    // Rendu du SVG Vectoriel HUD
     if (this.techSvgContainer) {
       this.techSvgContainer.innerHTML = TechniqueVisualEngine.renderSVG(family, tech);
     }
 
-    // Gestion de l'image scientifique réelle
-    if (realImg) {
+    // Configuration des boutons d'onglets (Image Réelle par défaut)
+    if (this.tabRealImgBtn) {
       this.tabRealImgBtn.classList.remove('hidden');
-      this.techRealImgEl.src = realImg.path;
-      this.techRealImgCaption.innerText = realImg.title;
-      this.switchVisualTab('svg'); // Démarrer sur le schéma vectoriel par défaut
-    } else {
-      this.tabRealImgBtn.classList.add('hidden');
-      this.switchVisualTab('svg');
     }
+
+    // Basculer sur l'image réelle par défaut
+    this.switchVisualTab('real');
 
     this.techModal.classList.remove('hidden');
   }
 
   switchVisualTab(type) {
-    if (type === 'real') {
-      this.techSvgContainer.classList.add('hidden');
-      this.techRealImgContainer.classList.remove('hidden');
-      this.tabRealImgBtn.className = 'px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold flex items-center gap-1.5';
-      this.tabVectorSvgBtn.className = 'px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 text-xs font-mono font-bold flex items-center gap-1.5';
-    } else {
+    if (type === 'svg') {
       this.techRealImgContainer.classList.add('hidden');
       this.techSvgContainer.classList.remove('hidden');
-      this.tabVectorSvgBtn.className = 'px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold flex items-center gap-1.5';
-      this.tabRealImgBtn.className = 'px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 text-xs font-mono font-bold flex items-center gap-1.5';
+      if (this.tabVectorSvgBtn) {
+        this.tabVectorSvgBtn.className = 'px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold flex items-center gap-1.5';
+      }
+      if (this.tabRealImgBtn) {
+        this.tabRealImgBtn.className = 'px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 text-xs font-mono font-bold flex items-center gap-1.5';
+      }
+    } else {
+      // 'real' par défaut
+      this.techSvgContainer.classList.add('hidden');
+      this.techRealImgContainer.classList.remove('hidden');
+      if (this.tabRealImgBtn) {
+        this.tabRealImgBtn.className = 'px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm shadow-cyan-500/20';
+      }
+      if (this.tabVectorSvgBtn) {
+        this.tabVectorSvgBtn.className = 'px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 text-xs font-mono font-bold flex items-center gap-1.5';
+      }
     }
   }
 
