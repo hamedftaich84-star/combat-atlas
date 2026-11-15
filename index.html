@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Atlas Biomécanique & Tactique des Arts Martiaux 3.5 (PC & Mobile)</title>
+  
+  <!-- Métadonnées PWA & Téléphone Mobile -->
+  <meta name="theme-color" content="#030712">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="Plateforme biomécanique et tactique des arts martiaux optimisée pour PC et téléphone. 10 disciplines, 18 techniques, modélisation 3D, Fight Timer vocal, Duel tactique.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            hudCyan: '#00CED1',
+            hudOrange: '#FF6B35',
+            hudGreen: '#00E676',
+            hudYellow: '#FFD700',
+            hudPurple: '#9333EA'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #030712;
+      color: #F3F4F6;
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (min-width: 1024px) {
+      body {
+        padding-bottom: 0px;
+      }
+    }
+
+    .font-hud {
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px rgba(0, 206, 209, 0.35);
+    }
+    .glow-orange {
+      box-shadow: 0 0 25px rgba(255, 107, 53, 0.35);
+    }
+    .glow-green {
+      box-shadow: 0 0 25px rgba(0, 230, 118, 0.35);
+    }
+    .tab-btn-active {
+      background: linear-gradient(135deg, rgba(0, 206, 209, 0.25), rgba(59, 130, 246, 0.25));
+      border-color: #00CED1;
+      color: #00CED1;
+    }
+    .mob-tab-active {
+      color: #00CED1 !important;
+      font-weight: 700;
+    }
+    .mob-tab-active span:first-child {
+      transform: translateY(-2px) scale(1.15);
+      transition: transform 0.2s ease;
+    }
+    .cam-btn-active {
+      background-color: #00CED1;
+      color: #030712;
+      font-weight: 700;
+      border-color: #00CED1;
+    }
+    .phase-pill-active {
+      background-color: #00CED1;
+      color: #030712;
+      font-weight: 700;
+      transform: scale(1.05);
+    }
+    /* Animation pulse timer 10s */
+    @keyframes pulseOrange {
+      0%, 100% { background-color: rgba(234, 88, 12, 0.3); }
+      50% { background-color: rgba(234, 88, 12, 0.7); }
+    }
+    .timer-warning-pulse {
+      animation: pulseOrange 1s infinite;
+    }
+    /* Bloquer le défilement page sur le Canvas tactile */
+    #canvas3d {
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-black">
+
+  <!-- En-tête Principal (Adaptatif PC & Téléphone) -->
+  <header class="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-sky-600 to-indigo-600 flex items-center justify-center font-hud text-lg sm:text-xl font-bold shadow-lg shadow-cyan-500/30 shrink-0">
+          🥋
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <h1 class="text-base sm:text-xl font-bold tracking-tight font-hud text-white truncate">ATLAS BIOMÉCANIQUE</h1>
+            <span class="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold border border-cyan-500/30 shrink-0">v3.5 PRO</span>
+          </div>
+          <p class="text-[10px] sm:text-xs text-slate-400 hidden xs:block sm:block truncate">PC & Mobile • 18 Techniques • Moteur 3D • Coach Vocal • Duel Tactique</p>
+        </div>
+      </div>
+
+      <!-- Contrôles d'en-tête : Plein Écran & Badges de Statuts -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleAppFullScreen()" class="p-2 sm:px-3 sm:py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-mono flex items-center gap-1 transition active:scale-95" title="Plein Écran">
+          <span id="fullscreenIcon">⛶</span>
+          <span class="hidden md:inline">Plein Écran</span>
+        </button>
+        <div class="hidden lg:flex items-center gap-2 text-xs font-mono">
+          <span class="px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> 60 fps Mocap
+          </span>
+          <span class="px-2.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/40 text-cyan-300">
+            10 Disciplines
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barre de Navigation à 9 Onglets -->
+    <nav class="max-w-7xl mx-auto px-4 flex gap-1 overflow-x-auto pb-1 text-sm font-medium scrollbar-none">
+      <button onclick="switchNav('lab3d')" id="nav-lab3d" class="nav-btn px-3.5 py-2 rounded-t-lg border-b-2 border-transparent hover:text-cyan-400 transition tab-btn-active whitespace-nowrap">
+        🥊 Labo 3D Multi-Angles
+      </button>
+      <button onclick="switchNav('duel')" id="nav-duel" class="nav-btn px-3.5 py-2 rounded-t-lg border-b-2 border-transparent hover:text-cyan-400 text-slate-400 transition whitespace-nowrap">
+        ⚔️ Duel Tactique (A vs B)
+      </button>
+      <button onclick="switchNav('avatars')" id="nav-avatars" class="nav-btn px-3.5 py-2 rounded-t-lg border-b-2 border-transparent hover:text-cyan-400 text-slate-400 transition whitespace-nowrap">
+        🔬 Études INSEP REVEA
+      </button>
+      <button onclick="switchNav('kickboxing')" id="nav-kickboxing" class="nav-btn px-3.5 py-2 rounded-t-lg border-b-2 border-transparent hover:text-cyan-400 text-slate-400 transition whitespace-nowrap">
+        🥋 Dossier Votre EPS
+      </button>
+      <button onclick="switchNav('encyclo')" id="nav-encyclo" class="nav-btn px-3.5 py-2 rounded-t-lg border-b-2 border-transparent hover:text-cyan-400 text-slate-400 transition whitespace-nowrap">
+        📚 Encyclopédie (18)
+      </button>
+      <button onclick="switchNav('tactique')" id="nav-tactique" class="nav-btn px-3.5 py-2 rounded-t-lg border-b-2 border-transparent hover:text-cyan-400 text-slate-400 transition whitespace-nowrap">
+        🎯 Matrice 4 Distances
+      </button>
+      <button onclick="switchNav('timer')" id="nav-timer" class="nav-btn px-3.5 py-2 rounded-t-lg border-b-2 border-transparent hover:text-cyan-400 text-slate-400 transition whitespace-nowrap">
+        ⏱️ Fight Timer & Coach
+      </button>
+      <button onclick="switchNav('dojo')" id="nav-dojo" class="nav-btn px-3.5 py-2 rounded-t-lg border-b-2 border-transparent hover:text-cyan-400 text-slate-400 transition whitespace-nowrap">
+        🥋 Dojo QI Combat
+      </button>
+      <button onclick="switchNav('fighters')" id="nav-fighters" class="nav-btn px-3.5 py-2 rounded-t-lg border-b-2 border-transparent hover:text-cyan-400 text-slate-400 transition whitespace-nowrap">
+        👑 Légendes du Combat
+      </button>
+    </nav>
+  </header>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-8">
+
+    <!-- ========================================== -->
+    <!-- SECTION 1 : LABORATOIRE 3D MULTI-ANGLES    -->
+    <!-- ========================================== -->
+    <section id="section-lab3d" class="space-y-6">
+      <!-- Panneau de contrôle haut -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl backdrop-blur">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+          <div>
+            <h2 class="text-2xl font-bold font-hud text-white flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+              MOTEUR CINÉMATIQUE SÉQUENTIEL 3D
+            </h2>
+            <p class="text-xs text-slate-400">Modélisation spatiale tridimensionnelle, chaîne cinétique fermée, vecteurs de réaction au sol (GRF) et HUD Votre EPS.</p>
+          </div>
+          
+          <!-- Sélecteur de technique 3D -->
+          <div class="flex items-center gap-2">
+            <label class="text-xs text-slate-400 font-medium">Technique :</label>
+            <select id="techSelect" onchange="loadTechnique3D(this.value)" class="bg-slate-950 border border-slate-700 text-cyan-300 font-hud text-sm rounded-xl px-3 py-1.5 focus:border-cyan-400 focus:outline-none">
+              <option value="cross">Direct Arrière (Cross) - Boxe</option>
+              <option value="teep">Front Kick (Teep Piston) - Muay-Thaï</option>
+              <option value="hook">Crochet au Menton (Hook) - Boxe</option>
+              <option value="uppercut">Uppercut Plongeant - Boxe</option>
+              <option value="lowkick">Low Kick (Pivot 180° & LCA) - Muay-Thaï</option>
+              <option value="armbar">Clé de Bras Armbar (Levier Cl. 1) - JJB</option>
+              <option value="doubleleg">Double Leg Takedown (Fauchage) - Lutte</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 6 Caméras Prédéfinies -->
+        <div class="flex flex-wrap items-center gap-2 p-2 rounded-xl bg-slate-950/70 border border-slate-800/80 mb-4">
+          <span class="text-xs font-mono text-slate-400 px-2 font-semibold">ANGLES DE VUE :</span>
+          <button onclick="setCameraView('zenith')" id="cam-zenith" class="cam-btn text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-400 text-slate-300 transition">
+            📐 Haut / Zénithale (85°)
+          </button>
+          <button onclick="setCameraView('back')" id="cam-back" class="cam-btn text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-400 text-slate-300 transition">
+            🔄 Derrière (270°)
+          </button>
+          <button onclick="setCameraView('left')" id="cam-left" class="cam-btn text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-400 text-slate-300 transition">
+            ⬅️ Côté Gauche (180°)
+          </button>
+          <button onclick="setCameraView('right')" id="cam-right" class="cam-btn text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-400 text-slate-300 transition">
+            ➡️ Côté Droit (0°)
+          </button>
+          <button onclick="setCameraView('front')" id="cam-front" class="cam-btn text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-400 text-slate-300 transition">
+            🎯 Face (90°)
+          </button>
+          <button onclick="setCameraView('iso')" id="cam-iso" class="cam-btn text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-400 text-slate-300 transition cam-btn-active">
+            🧊 Isométrique (45°)
+          </button>
+        </div>
+
+        <!-- Grille Principale Canvas 3D + Télémétrie -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <!-- Zone Canvas 3D (3 colonnes) -->
+          <div class="lg:col-span-3 space-y-3">
+            <div class="relative w-full aspect-[16/10] bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl flex items-center justify-center">
+              <canvas id="canvas3d" width="900" height="560" class="w-full h-full object-contain cursor-grab active:cursor-grabbing"></canvas>
+              
+              <!-- Badges HUD Superposés -->
+              <div class="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none">
+                <span id="camBadge" class="px-2.5 py-1 rounded bg-slate-900/90 border border-cyan-500/40 text-cyan-400 font-mono text-xs font-bold backdrop-blur">
+                  CAMÉRA : ISOMÉTRIQUE (Az 45° | El 22°)
+                </span>
+                <span id="forceBadge" class="px-2.5 py-1 rounded bg-slate-900/90 border border-orange-500/40 text-orange-400 font-mono text-xs font-bold backdrop-blur">
+                  FORCE ESTIMÉE : 3 158 N (ÉLITE)
+                </span>
+                <span id="massEffBadge" class="px-2.5 py-1 rounded bg-slate-900/90 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold backdrop-blur">
+                  MASSE EFFECTIVE m_eff : 32.4 kg
+                </span>
+              </div>
+
+              <!-- Indicateur d'interaction souris -->
+              <div class="absolute bottom-3 right-3 px-2 py-1 rounded bg-slate-900/80 border border-slate-800 text-[10px] text-slate-400 font-mono pointer-events-none">
+                🖱️ Glisser pour orbiter à 360°
+              </div>
+            </div>
+
+            <!-- Barre de Contrôle Chronologique Début Jusqu'à la Fin -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+              <div class="flex items-center justify-between text-xs font-mono">
+                <span class="text-cyan-400 font-bold flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> SÉQUENCE CHRONOLOGIQUE : <span id="phaseText">Impact & Raideur</span>
+                </span>
+                <span id="timePct" class="text-slate-400">Progression : 80%</span>
+              </div>
+
+              <!-- Curseur temporel -->
+              <div class="flex items-center gap-3">
+                <input type="range" id="timeScrubber" min="0" max="100" value="80" oninput="onScrub(this.value)" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+              </div>
+
+              <!-- Étapes Clés (0% à 100%) -->
+              <div class="grid grid-cols-6 gap-1 text-[11px] font-mono text-center">
+                <button onclick="jumpToPhase(0)" class="phase-pill p-1 rounded bg-slate-900 hover:bg-cyan-900/40 border border-slate-800 text-slate-400">1. Garde (0%)</button>
+                <button onclick="jumpToPhase(20)" class="phase-pill p-1 rounded bg-slate-900 hover:bg-cyan-900/40 border border-slate-800 text-slate-400">2. Poussée (20%)</button>
+                <button onclick="jumpToPhase(40)" class="phase-pill p-1 rounded bg-slate-900 hover:bg-cyan-900/40 border border-slate-800 text-slate-400">3. Torsion (40%)</button>
+                <button onclick="jumpToPhase(60)" class="phase-pill p-1 rounded bg-slate-900 hover:bg-cyan-900/40 border border-slate-800 text-slate-400">4. Déploiement (60%)</button>
+                <button onclick="jumpToPhase(80)" class="phase-pill p-1 rounded bg-cyan-500/20 border border-cyan-400 text-cyan-300 font-bold phase-pill-active">5. Impact (80%)</button>
+                <button onclick="jumpToPhase(100)" class="phase-pill p-1 rounded bg-slate-900 hover:bg-cyan-900/40 border border-slate-800 text-slate-400">6. Recouvrement (100%)</button>
+              </div>
+
+              <!-- Boutons de lecture et vitesse -->
+              <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+                <div class="flex items-center gap-2">
+                  <button id="playBtn" onclick="togglePlay()" class="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold font-hud text-xs flex items-center gap-1.5 transition">
+                    ▶ LECTURE CONTINUE
+                  </button>
+                  <button onclick="resetAnim()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition">
+                    ↺ Réinitialiser
+                  </button>
+                </div>
+
+                <div class="flex items-center gap-1.5 text-xs font-mono">
+                  <span class="text-slate-400">Vitesse :</span>
+                  <button onclick="setSpeed(0.25)" class="speed-btn px-2 py-1 rounded bg-slate-800 text-slate-300 hover:text-white">0.25×</button>
+                  <button onclick="setSpeed(0.5)" class="speed-btn px-2 py-1 rounded bg-slate-800 text-slate-300 hover:text-white">0.5×</button>
+                  <button onclick="setSpeed(1.0)" class="speed-btn px-2 py-1 rounded bg-cyan-600 text-white font-bold">1.0×</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Colonne Télémétrie Biomécanique & Calques HUD (1 colonne) -->
+          <div class="space-y-4">
+            <!-- Calques HUD Affichables -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+              <h3 class="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                <span>👁️</span> CALQUES DU HUD BIOMÉCANIQUE
+              </h3>
+              <div class="space-y-2 text-xs">
+                <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800 cursor-pointer">
+                  <span class="text-cyan-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Squelette Mocap & Segments
+                  </span>
+                  <input type="checkbox" id="layerSkeleton" checked onchange="toggleHudLayer('skeleton', this.checked)" class="accent-cyan-400">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800 cursor-pointer">
+                  <span class="text-orange-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-orange-400"></span> Vecteurs de Force GRF
+                  </span>
+                  <input type="checkbox" id="layerForces" checked onchange="toggleHudLayer('forces', this.checked)" class="accent-orange-400">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800 cursor-pointer">
+                  <span class="text-emerald-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Polygone de Sustentation
+                  </span>
+                  <input type="checkbox" id="layerPolygon" checked onchange="toggleHudLayer('polygon', this.checked)" class="accent-emerald-400">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800 cursor-pointer">
+                  <span class="text-yellow-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span> Centre de Masse (CoM 4 quad)
+                  </span>
+                  <input type="checkbox" id="layerCom" checked onchange="toggleHudLayer('com', this.checked)" class="accent-yellow-400">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800 cursor-pointer">
+                  <span class="text-indigo-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span> Goniomètres d'Angles
+                  </span>
+                  <input type="checkbox" id="layerAngles" checked onchange="toggleHudLayer('angles', this.checked)" class="accent-indigo-400">
+                </label>
+              </div>
+            </div>
+
+            <!-- Télémétrie Dynamique en Temps Réel -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
+              <h3 class="font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                <span>📊</span> TÉLÉMÉTRIE D'IMPACT
+              </h3>
+              <div class="space-y-2">
+                <div class="p-2 rounded bg-slate-900/60 border border-slate-800">
+                  <div class="text-[10px] text-slate-400">Angle d'ouverture du Coude</div>
+                  <div id="telemetryElbow" class="text-cyan-400 font-bold text-sm">112.9° (Optimum INSEP)</div>
+                </div>
+                <div class="p-2 rounded bg-slate-900/60 border border-slate-800">
+                  <div class="text-[10px] text-slate-400">Vitesse du Poing / Tibia</div>
+                  <div id="telemetrySpeed" class="text-cyan-400 font-bold text-sm">8.4 m/s (30.2 km/h)</div>
+                </div>
+                <div class="p-2 rounded bg-slate-900/60 border border-slate-800">
+                  <div class="text-[10px] text-slate-400">Ratio GRF Sol (Arrière / Avant)</div>
+                  <div id="telemetryGrf" class="text-orange-400 font-bold text-sm">60.6% / 39.4%</div>
+                </div>
+                <div class="p-2 rounded bg-slate-900/60 border border-slate-800">
+                  <div class="text-[10px] text-slate-400">Cocontraction de Raideur sEMG</div>
+                  <div id="telemetrySemg" class="text-emerald-400 font-bold text-sm">Δt ≈ 18 ms avant impact</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Résumé Biomécanique de l'étape active -->
+            <div id="phaseExplanationBox" class="p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/30 text-xs space-y-1.5">
+              <div class="font-bold text-cyan-300 flex items-center gap-1.5">
+                <span>💡</span> EXPLICATION BIOMÉCANIQUE
+              </div>
+              <p id="phaseExplanationText" class="text-slate-300 leading-relaxed">
+                Phase 5 (Impact & Cocontraction) : Synchronisation des agonistes et antagonistes du membre frappeur créant une raideur quasi-instantanée (Δt ≈ 18 ms) qui solidarise la masse corporelle effective (m_eff = 32.4 kg) pour maximiser le transfert d'impulsion.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 2 : SIMULATEUR DE DUEL TACTIQUE    -->
+    <!-- ========================================== -->
+    <section id="section-duel" class="hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold font-hud text-white flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+            SIMULATEUR DE DUEL TACTIQUE (COMBATTANT A vs COMBATTANT B)
+          </h2>
+          <p class="text-xs text-slate-400">Sélectionnez librement deux techniques pour calculer l'interaction cinétique, les failles exploitées et l'avantage décisionnel.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Combattant A -->
+          <div class="p-5 rounded-2xl bg-cyan-950/20 border border-cyan-500/40 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold font-hud text-lg text-cyan-300 flex items-center gap-2">
+                <span>🔴</span> COMBATTANT A (Attaquant Principal)
+              </h3>
+              <span class="text-xs px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">INITIATIVE</span>
+            </div>
+            
+            <div class="space-y-2">
+              <label class="text-xs text-slate-400">Sélectionner la Technique :</label>
+              <select id="duelSelectA" onchange="runDuelSimulation()" class="w-full bg-slate-900 border border-slate-700 text-cyan-300 font-hud text-sm rounded-xl p-2.5 focus:border-cyan-400 focus:outline-none">
+              </select>
+            </div>
+
+            <div id="duelInfoA" class="space-y-2 text-xs font-mono text-slate-300 bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+            </div>
+          </div>
+
+          <!-- Combattant B -->
+          <div class="p-5 rounded-2xl bg-rose-950/20 border border-rose-500/40 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold font-hud text-lg text-rose-300 flex items-center gap-2">
+                <span>🔵</span> COMBATTANT B (Riposte / Contre)
+              </h3>
+              <span class="text-xs px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-mono">RÉACTION</span>
+            </div>
+            
+            <div class="space-y-2">
+              <label class="text-xs text-slate-400">Sélectionner la Technique :</label>
+              <select id="duelSelectB" onchange="runDuelSimulation()" class="w-full bg-slate-900 border border-slate-700 text-rose-300 font-hud text-sm rounded-xl p-2.5 focus:border-rose-400 focus:outline-none">
+              </select>
+            </div>
+
+            <div id="duelInfoB" class="space-y-2 text-xs font-mono text-slate-300 bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+            </div>
+          </div>
+        </div>
+
+        <!-- Panneau de Résolution Cinétique du Duel -->
+        <div id="duelResultBox" class="p-6 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-700 space-y-4 shadow-2xl">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <h4 class="font-bold font-hud text-base text-yellow-400 flex items-center gap-2">
+              <span>⚡</span> RÉSULTAT DE L'INTERACTION CINÉTIQUE & AVANTAGE DÉCISIONNEL
+            </h4>
+            <div id="duelVerdictPill" class="px-3 py-1 rounded-full text-xs font-mono font-bold">
+            </div>
+          </div>
+
+          <!-- Jauge d'Avantage Décisionnel -->
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-xs font-mono">
+              <span id="duelPctA" class="text-cyan-400 font-bold">Combattant A : 50%</span>
+              <span id="duelPctB" class="text-rose-400 font-bold">Combattant B : 50%</span>
+            </div>
+            <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
+              <div id="duelBarA" class="h-full bg-cyan-500 transition-all duration-500" style="width: 50%;"></div>
+              <div id="duelBarB" class="h-full bg-rose-500 transition-all duration-500" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <!-- Analyse Détaillée des Facteurs de Collision -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+              <div class="text-slate-400 font-mono">Compatibilité des Distances</div>
+              <div id="duelDistAnalysis" class="font-bold text-slate-200"></div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+              <div class="text-slate-400 font-mono">Différentiel de Vitesse & Timing</div>
+              <div id="duelSpeedAnalysis" class="font-bold text-slate-200"></div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+              <div class="text-slate-400 font-mono">Exploitation de Faille Directe</div>
+              <div id="duelFlawAnalysis" class="font-bold text-slate-200"></div>
+            </div>
+          </div>
+
+          <!-- Synthèse Tactique Complète -->
+          <div id="duelDetailedVerdict" class="text-xs text-slate-300 leading-relaxed bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3 : ÉTUDES INSEP REVEA (AVATARS)   -->
+    <!-- ========================================== -->
+    <section id="section-avatars" class="hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold font-hud text-white flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+            RECHERCHE SCIENTIFIQUE INSEP REVEA (Dr Daniel Dinu)
+          </h2>
+          <p class="text-xs text-slate-400">Reconstitution cinématique 3D par 17 centrales inertielles UMI Xsens (240 Hz), données sEMG et modélisation de raideur articulaire.</p>
+        </div>
+
+        <!-- Galerie des Avatars 3D INSEP -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center border border-slate-800">
+              <img src="./images/insep_boxeur_cross.png" alt="Direct Cross INSEP" class="w-full h-full object-contain hover:scale-105 transition">
+            </div>
+            <div class="space-y-1">
+              <div class="text-xs font-mono text-cyan-400 font-bold">DIRECT ARRIÈRE (CROSS)</div>
+              <p class="text-[11px] text-slate-400">Force maximale de 3 158 N chez l'expert. Angle coude optimal 112.9°. Verrouillage terminal cocontracté.</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center border border-slate-800">
+              <img src="./images/insep_boxeur_hook.png" alt="Crochet Hook INSEP" class="w-full h-full object-contain hover:scale-105 transition">
+            </div>
+            <div class="space-y-1">
+              <div class="text-xs font-mono text-cyan-400 font-bold">CROCHET COURT (HOOK)</div>
+              <p class="text-[11px] text-slate-400">Couple de rotation du tronc à forte accélération centripète. Fixation scapulaire du grand dorsal et pectoral.</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center border border-slate-800">
+              <img src="./images/insep_boxeur_uppercut.png" alt="Uppercut INSEP" class="w-full h-full object-contain hover:scale-105 transition">
+            </div>
+            <div class="space-y-1">
+              <div class="text-xs font-mono text-cyan-400 font-bold">UPPERCUT PLONGEANT</div>
+              <p class="text-[11px] text-slate-400">Impulsion verticale ascendante combinée à une extension d'épaule et de hanche. Transfert direct de la cuisse arrière.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Planche Complète et Graphes Scientifiques -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t border-slate-800">
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="text-xs font-mono text-yellow-400 font-bold">PLANCHE SCIENTIFIQUE COMPLETE (INSEP REVEA)</div>
+            <img src="./images/insep_page13_hd.png" alt="Planche HD INSEP" class="w-full rounded-lg border border-slate-800">
+          </div>
+          <div class="space-y-4">
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+              <div class="text-xs font-mono text-orange-400 font-bold">FIGURE 1 : FORCE ET VITESSE (ÉLITE vs JUNIOR)</div>
+              <img src="./images/figure1_insep.jpeg" alt="Graphe Force Vitesse" class="w-full rounded-lg border border-slate-800">
+              <p class="text-[11px] text-slate-400">Comparaison clinique des profils de force d'impact : les élites génèrent 3x plus d'énergie grâce à un meilleur transfert GRF.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+              <div class="text-xs font-mono text-emerald-400 font-bold">FIGURE 2 : CORRÉLATION DE PERFORMANCE</div>
+              <img src="./images/figure2_insep.jpeg" alt="Corrélation INSEP" class="w-full rounded-lg border border-slate-800">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 4 : DOSSIER BIOMÉCANIQUE VOTRE EPS -->
+    <!-- ========================================== -->
+    <section id="section-kickboxing" class="hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold font-hud text-white flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+            BIOMÉCANIQUE DU KICKBOXING (ANALYSE VOTRE EPS)
+          </h2>
+          <p class="text-xs text-slate-400">Modélisation de la masse effective (m_eff), chaînes cinétiques ouvertes/fermées et prévention des ruptures du LCA.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <img src="./images/votreeps_planche_biomecanique.png" alt="Planche Biomécanique Votre EPS" class="w-full rounded-lg border border-slate-800 shadow-lg">
+            <div class="text-[11px] text-slate-400 font-mono text-center">
+              Figure officielle : Cinématique de rotation, pivot métatarsien et alignement des segments.
+            </div>
+          </div>
+
+          <div class="space-y-4 text-xs text-slate-300">
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+              <h3 class="font-bold text-cyan-300 font-hud text-sm flex items-center gap-2">
+                <span>⚡</span> LE CONCEPT DE MASSE EFFECTIVE (m_eff ≈ 32 kg)
+              </h3>
+              <p class="leading-relaxed">
+                Lors d'un coup de pied ou de poing, un membre isolé ne pèse que quelques kilogrammes. C'est la <strong>cocontraction isométrique terminale</strong> (agonistes + antagonistes) survenant 18 à 20 ms avant l'impact qui verrouille le corps tout entier en un bloc rigide, conférant une masse effective de plus de 32 kg à la collision.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+              <h3 class="font-bold text-rose-300 font-hud text-sm flex items-center gap-2">
+                <span>🛡️</span> PRÉVENTION DE LA RUPTURE DU LIGAMENT CROISÉ ANTÉRIEUR (LCA)
+              </h3>
+              <p class="leading-relaxed">
+                Sur un coup de pied circulaire (Low kick ou High kick), l'athlète pivote impérativement sur la tête métatarsienne de son pied d'appui de <strong>90° à 180°</strong>. Sans ce pivotement, le fémur applique un couple de torsion en valgus violent sur le plateau tibial bloqué au sol, entraînant une rupture immédiate du ligament croisé antérieur (LCA).
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+              <h3 class="font-bold text-yellow-300 font-hud text-sm flex items-center gap-2">
+                <span>⚖️</span> DUEL SAGITTAL (PISTON) vs CENTRIFUGE (FOUET)
+              </h3>
+              <p class="leading-relaxed">
+                Le <strong>Front Kick (Teep)</strong> opère comme un piston sagittal linéaire axé sur l'iliopsoas et la bascule du tronc. Le <strong>Roundhouse Kick</strong> exploite au contraire un couple rotatif à accélération centrifuge pure délivré par le tiers distal du tibia.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 5 : ENCYCLOPÉDIE DES 18 TECHNIQUES -->
+    <!-- ========================================== -->
+    <section id="section-encyclo" class="hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-bold font-hud text-white flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+              ENCYCLOPÉDIE MARTIALE RELATIONNELLE (18 FONDAMENTAUX)
+            </h2>
+            <p class="text-xs text-slate-400">10 disciplines représentées : Boxe, Muay-Thaï, Savate, Sambo, Wing Chun, Judo, Karaté, JJB, Lutte, MMA.</p>
+          </div>
+
+          <!-- Filtres de recherche -->
+          <div class="flex flex-wrap items-center gap-3">
+            <input type="text" id="encycloSearch" oninput="filterTechniques()" placeholder="Rechercher muscle, cible, nom..." class="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-xl px-3 py-2 w-64 focus:border-cyan-400 focus:outline-none">
+            <select id="disciplineFilter" onchange="filterTechniques()" class="bg-slate-950 border border-slate-700 text-xs text-cyan-300 rounded-xl px-3 py-2 focus:border-cyan-400 focus:outline-none">
+              <option value="ALL">Toutes les Disciplines (10)</option>
+              <option value="Boxe Anglaise">Boxe Anglaise</option>
+              <option value="Muay-Thaï">Muay-Thaï</option>
+              <option value="Savate Boxe Française">Savate Boxe Française</option>
+              <option value="Sambo">Sambo</option>
+              <option value="Wing Chun">Wing Chun</option>
+              <option value="Judo">Judo</option>
+              <option value="Karaté">Karaté</option>
+              <option value="Jiu-Jitsu Brésilien">Jiu-Jitsu Brésilien</option>
+              <option value="Lutte Libre & Gréco-Romaine">Lutte Libre</option>
+              <option value="MMA">MMA</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Grille des Cartes -->
+        <div id="encycloGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 6 : MATRICE DES 4 DISTANCES        -->
+    <!-- ========================================== -->
+    <section id="section-tactique" class="hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold font-hud text-white flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+            MATRICE TACTIQUE DES 4 DISTANCES (STRIKER vs GRAPPLER)
+          </h2>
+          <p class="text-xs text-slate-400">Arbres décisionnels, décalages géométriques et analyse des transitions de phases.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="text-xs font-mono text-cyan-400 font-bold">ZONE 1 : HORS D'ATTEINTE</div>
+            <div class="text-[11px] text-slate-300">Distance &gt; 2.5 m. Feintes, gestion du timing, déplacements en diagonale pour empêcher le cadrage du grappler.</div>
+            <div class="text-[10px] text-emerald-400 font-mono">Stratégie : Conserver le centre du ring.</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="text-xs font-mono text-yellow-400 font-bold">ZONE 2 : DISTANCE DE FRAPPE</div>
+            <div class="text-[11px] text-slate-300">Distance 1.2 m - 2.0 m. Frappes linéaires (Jab, Cross, Teep) et coups de pied bas circulaires. Danger de pénétration en lutte.</div>
+            <div class="text-[10px] text-rose-400 font-mono">Stratégie : Frapper puis pivoter à 45°.</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="text-xs font-mono text-orange-400 font-bold">ZONE 3 : CLINCH & CORPS-À-CORPS</div>
+            <div class="text-[11px] text-slate-300">Distance 0.3 m - 0.8 m. Sous-aisselles (underhooks), contrôle de nuque en double collier thaï, coups de coude et de genou.</div>
+            <div class="text-[10px] text-cyan-400 font-mono">Stratégie : Verrouiller les hanches.</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="text-xs font-mono text-rose-400 font-bold">ZONE 4 : COMBAT AU SOL</div>
+            <div class="text-[11px] text-slate-300">Distance 0 m. Garde fermée, contrôle latéral, position montée. Soumissions articulaires (Armbar, Kneebar) ou Ground and Pound.</div>
+            <div class="text-[10px] text-yellow-400 font-mono">Stratégie : Posture haute ou pontage immédiat.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 7 : FIGHT TIMER & COACH VOCAL      -->
+    <!-- ========================================== -->
+    <section id="section-timer" class="hidden space-y-6">
+      <div id="timerContainer" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur space-y-6 transition-all duration-300">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-bold font-hud text-white flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+              FIGHT TIMER & COACH VOCAL INTERACTIF
+            </h2>
+            <p class="text-xs text-slate-400">Synthèse vocale native SpeechSynthesis, cloche harmonique Web Audio API et ergonomie haute visibilité (3 à 5 mètres).</p>
+          </div>
+
+          <!-- Préréglages Immédiats -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="setTimerPreset('boxe')" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-cyan-300 hover:border-cyan-400 transition">
+              🥊 Boxe (3×3 min)
+            </button>
+            <button onclick="setTimerPreset('muay')" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-yellow-300 hover:border-yellow-400 transition">
+              🥋 Muay-Thaï (5×3 min)
+            </button>
+            <button onclick="setTimerPreset('tabata')" class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-rose-300 hover:border-rose-400 transition">
+              ⚡ Tabata Éclair (8×20s/10s)
+            </button>
+          </div>
+        </div>
+
+        <!-- Grand Affichage Plein Écran (Gloves-on UX) -->
+        <div id="timerDisplayBox" class="p-8 sm:p-12 rounded-3xl bg-slate-950 border border-slate-800 text-center space-y-4 shadow-2xl relative overflow-hidden">
+          <div id="timerPhaseBadge" class="inline-block px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-sm font-bold border border-emerald-500/30">
+            ROUND 1 EN COURS
+          </div>
+
+          <!-- Chronomètre Géant -->
+          <div id="timerClock" class="text-7xl sm:text-9xl font-extrabold font-hud tracking-tight text-white select-none">
+            03:00
+          </div>
+
+          <div class="flex justify-center items-center gap-6 text-sm font-mono text-slate-400">
+            <span id="roundCounter">Round : 1 / 3</span>
+            <span>•</span>
+            <span id="timerStatusText">Prêt pour le combat</span>
+          </div>
+
+          <!-- Bannière d'Ordre Vocal en Direct -->
+          <div id="vocalOrderBanner" class="p-3 rounded-xl bg-slate-900/90 border border-cyan-500/30 text-cyan-300 font-hud text-lg font-bold min-h-[50px] flex items-center justify-center">
+            🗣️ Ordre du coach : "Préparez votre garde !"
+          </div>
+        </div>
+
+        <!-- Contrôles du Timer & Mode de Coaching -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Commandes Principales -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center gap-4">
+            <button id="timerToggleBtn" onclick="toggleTimer()" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold font-hud text-base shadow-lg transition">
+              ▶ DÉMARRER LE ROUND
+            </button>
+            <button onclick="resetTimer()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-sm transition">
+              ↺ Réinitialiser
+            </button>
+          </div>
+
+          <!-- Configuration du Coach Vocal -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono text-slate-300 font-bold">MODE DU COACH VOCAL :</span>
+              <label class="flex items-center gap-2 cursor-pointer text-xs text-cyan-400">
+                <input type="checkbox" id="voiceCoachToggle" checked onchange="toggleVoiceCoach(this.checked)" class="accent-cyan-400">
+                Voix Active
+              </label>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="setVoiceMode('combos')" id="voiceModeCombos" class="flex-1 py-1.5 rounded-lg bg-cyan-600 text-white font-bold text-xs">
+                Combos Signature
+              </button>
+              <button onclick="setVoiceMode('callout')" id="voiceModeCallout" class="flex-1 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs">
+                Target Callout (Cibles)
+              </button>
+            </div>
+            <div class="text-[11px] text-slate-400">
+              Cadence des annonces : toutes les <strong>5 secondes</strong> durant le round.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 8 : DOJO DE SPARRING (QI COMBAT)   -->
+    <!-- ========================================== -->
+    <section id="section-dojo" class="hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-bold font-hud text-white flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+              DOJO DE SPARRING VIRTUEL (QI DÉCISIONNEL DE COMBAT)
+            </h2>
+            <p class="text-xs text-slate-400">Scénarios d'agression réels, choix sous stress, analyse biomécanique immédiate et jauge d'expérience.</p>
+          </div>
+          <div class="px-4 py-1.5 rounded-xl bg-slate-950 border border-yellow-500/40 text-yellow-400 font-mono text-xs font-bold">
+            XP ACQUISE : <span id="dojoXpBadge">0 XP</span>
+          </div>
+        </div>
+
+        <div id="dojoCard" class="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+          <!-- Rempli par JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 9 : LÉGENDES DU COMBAT             -->
+    <!-- ========================================== -->
+    <section id="section-fighters" class="hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold font-hud text-white flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-indigo-400"></span>
+            ÉTUDE DES LÉGENDES (FIGHTER STUDIES)
+          </h2>
+          <p class="text-xs text-slate-400">Analyses tactiques et biomécaniques des plus grands maîtres avec chargement direct de leurs combinaisons dans le Coach Vocal.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- 1. Muhammad Ali -->
+          <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 hover:border-cyan-500/50 transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-bold font-hud text-lg text-white">Muhammad Ali</h3>
+                <span class="text-xs text-cyan-400 font-mono">"The Greatest" • Boxe Anglaise</span>
+              </div>
+              <span class="text-2xl">🦋</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Pionnier du jeu de jambes flottant (<em>Float like a butterfly, sting like a bee</em>). Déplacement en orbite circulaire, esquive arrière de buste sans rupture d'équilibre et jab ultra-rapide à 9.8 m/s.
+            </p>
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono space-y-1">
+              <div class="text-cyan-400 font-bold">Combinaison Signature :</div>
+              <div class="text-slate-300">Jab • Double Jab • Cross arrière • Pivot d'esquive</div>
+            </div>
+            <button onclick="loadFighterIntoCoach('ali')" class="w-full py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold font-hud text-xs transition flex items-center justify-center gap-2">
+              <span>🎙️</span> Lancer ses Combos dans le Coach Vocal
+            </button>
+          </div>
+
+          <!-- 2. Mike Tyson -->
+          <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 hover:border-rose-500/50 transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-bold font-hud text-lg text-white">Mike Tyson</h3>
+                <span class="text-xs text-rose-400 font-mono">"Iron Mike" • Boxe Anglaise</span>
+              </div>
+              <span class="text-2xl">💣</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Maître absolu du système <strong>Peek-a-boo</strong>. Oscillations pendulaires rapides (Bob and weave) accumulant l'énergie élastique dans les quadriceps pour libérer des crochets dévastateurs (>3 500 N).
+            </p>
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono space-y-1">
+              <div class="text-rose-400 font-bold">Combinaison Signature :</div>
+              <div class="text-slate-300">Esquive rotative • Crochet au foie • Uppercut au menton</div>
+            </div>
+            <button onclick="loadFighterIntoCoach('tyson')" class="w-full py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold font-hud text-xs transition flex items-center justify-center gap-2">
+              <span>🎙️</span> Lancer ses Combos dans le Coach Vocal
+            </button>
+          </div>
+
+          <!-- 3. Buakaw Banchamek -->
+          <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 hover:border-yellow-500/50 transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-bold font-hud text-lg text-white">Buakaw Banchamek</h3>
+                <span class="text-xs text-yellow-400 font-mono">"White Lotus" • Muay-Thaï</span>
+              </div>
+              <span class="text-2xl">🥊</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Symbole du coup de tibia destructeur. Transfert complet du poids de hanche sur le tiers distal du tibia, teep repoussoir brisant l'élan adverse et genoux dévastateurs en clinch.
+            </p>
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono space-y-1">
+              <div class="text-yellow-400 font-bold">Combinaison Signature :</div>
+              <div class="text-slate-300">Teep d'arrêt • Feinte de Teep • Low kick tibias d'acier</div>
+            </div>
+            <button onclick="loadFighterIntoCoach('buakaw')" class="w-full py-2 rounded-xl bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-bold font-hud text-xs transition flex items-center justify-center gap-2">
+              <span>🎙️</span> Lancer ses Combos dans le Coach Vocal
+            </button>
+          </div>
+
+          <!-- 4. Royce Gracie -->
+          <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 hover:border-emerald-500/50 transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-bold font-hud text-lg text-white">Royce Gracie</h3>
+                <span class="text-xs text-emerald-400 font-mono">Pionnier UFC • Jiu-Jitsu Brésilien</span>
+              </div>
+              <span class="text-2xl">🥋</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Démontra l'absolue suprématie de la biomécanique des leviers sur la masse brute. Fermeture de distance sous les frappes, amenée au sol, garde fermée et soumission en clé de bras ou guillotine.
+            </p>
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono space-y-1">
+              <div class="text-emerald-400 font-bold">Combinaison Signature :</div>
+              <div class="text-slate-300">Front kick de distance • Clinch sous-aisselle • Clé de bras Armbar</div>
+            </div>
+            <button onclick="loadFighterIntoCoach('gracie')" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold font-hud text-xs transition flex items-center justify-center gap-2">
+              <span>🎙️</span> Lancer ses Combos dans le Coach Vocal
+            </button>
+          </div>
+
+          <!-- 5. Georges St-Pierre -->
+          <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 hover:border-indigo-500/50 transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-bold font-hud text-lg text-white">Georges St-Pierre</h3>
+                <span class="text-xs text-indigo-400 font-mono">"GSP" • MMA / Karaté / Lutte</span>
+              </div>
+              <span class="text-2xl">🇨🇦</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Perfection de la transition strikegrapple. Jab clinique masquant un abaissement explosif du centre de gravité, suivi d'une pénétration en Double Leg Takedown avec 100% de timing.
+            </p>
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono space-y-1">
+              <div class="text-indigo-400 font-bold">Combinaison Signature :</div>
+              <div class="text-slate-300">Jab d'aveuglement • Changement de niveau • Double Leg Takedown</div>
+            </div>
+            <button onclick="loadFighterIntoCoach('gsp')" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold font-hud text-xs transition flex items-center justify-center gap-2">
+              <span>🎙️</span> Lancer ses Combos dans le Coach Vocal
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BARRE DE NAVIGATION INFÉRIEURE FIXE (Optimisation Téléphone Mobile / PWA) -->
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 border-t border-slate-800 backdrop-blur z-50 flex items-center justify-around px-1 py-1.5 shadow-2xl safe-area-bottom">
+    <button onclick="switchNav('lab3d')" id="mob-lab3d" class="flex flex-col items-center justify-center p-1 text-slate-400 mob-tab-active flex-1 text-[10px] active:scale-95 transition">
+      <span class="text-lg">🥊</span>
+      <span class="truncate">Labo 3D</span>
+    </button>
+    <button onclick="switchNav('duel')" id="mob-duel" class="flex flex-col items-center justify-center p-1 text-slate-400 flex-1 text-[10px] active:scale-95 transition">
+      <span class="text-lg">⚔️</span>
+      <span class="truncate">Duel</span>
+    </button>
+    <button onclick="switchNav('encyclo')" id="mob-encyclo" class="flex flex-col items-center justify-center p-1 text-slate-400 flex-1 text-[10px] active:scale-95 transition">
+      <span class="text-lg">📚</span>
+      <span class="truncate">Encyclo</span>
+    </button>
+    <button onclick="switchNav('timer')" id="mob-timer" class="flex flex-col items-center justify-center p-1 text-slate-400 flex-1 text-[10px] active:scale-95 transition">
+      <span class="text-lg">⏱️</span>
+      <span class="truncate">Timer</span>
+    </button>
+    <button onclick="switchNav('dojo')" id="mob-dojo" class="flex flex-col items-center justify-center p-1 text-slate-400 flex-1 text-[10px] active:scale-95 transition">
+      <span class="text-lg">🥋</span>
+      <span class="truncate">Dojo</span>
+    </button>
+    <button onclick="switchNav('fighters')" id="mob-fighters" class="flex flex-col items-center justify-center p-1 text-slate-400 flex-1 text-[10px] active:scale-95 transition">
+      <span class="text-lg">👑</span>
+      <span class="truncate">Légendes</span>
+    </button>
+  </nav>
+
+  <!-- MODALE ANATOMIQUE DÉTAILLÉE -->
+  <div id="techModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-start justify-between border-b border-slate-800 pb-3">
+        <div>
+          <span id="modalDisciplineBadge" class="text-xs font-mono px-2.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold"></span>
+          <h3 id="modalTitle" class="text-2xl font-bold font-hud text-white mt-1"></h3>
+          <p id="modalSubTitle" class="text-xs text-slate-400 font-mono"></p>
+        </div>
+        <button onclick="closeTechModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+          <div class="font-bold text-cyan-400 font-mono">MÉCANIQUE DE LEVIER & CINÉMATIQUE</div>
+          <p id="modalLever" class="text-slate-300 leading-relaxed"></p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+            <div class="font-bold text-emerald-400 font-mono">MUSCLES MOTEURS RECRUTÉS</div>
+            <ul id="modalMotors" class="list-disc list-inside text-slate-300 space-y-0.5"></ul>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+            <div class="font-bold text-yellow-400 font-mono">CIBLES ANATOMIQUES</div>
+            <ul id="modalTargets" class="list-disc list-inside text-slate-300 space-y-0.5"></ul>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-rose-950/20 border border-rose-500/30 space-y-1">
+          <div class="font-bold text-rose-400 font-mono">FAILLES BIOMÉCANIQUES EXPOSÉES</div>
+          <ul id="modalFlaws" class="list-disc list-inside text-slate-300 space-y-0.5"></ul>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-500/30 space-y-1">
+          <div class="font-bold text-cyan-400 font-mono">CONTRES RECOMMANDÉS</div>
+          <ul id="modalCounters" class="list-disc list-inside text-slate-300 space-y-0.5"></ul>
+        </div>
+
+        <div id="modalInsepBox" class="p-3.5 rounded-xl bg-indigo-950/20 border border-indigo-500/30 text-indigo-200 font-mono text-[11px] space-y-1">
+          <div class="font-bold text-indigo-400">DONNÉES BIOMÉCANIQUES DE RÉFÉRENCE (INSEP) :</div>
+          <div id="modalInsepContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT GLOBAL EMBARQUÉ -->
+  <script>
+    // 1. DATASET COMPLET DES 18 TECHNIQUES
+    const DATASET = {"version": "2.0", "derniere_mise_a_jour": "2026-11-15", "description": "Base de données relationnelle biomécanique et tactique des arts martiaux et sports de combat - 10 disciplines et 18 techniques fondamentales.", "disciplines_supportees": ["Boxe Anglaise", "Muay-Thaï", "Savate Boxe Française", "Sambo", "Wing Chun", "Judo", "Karaté", "Jiu-Jitsu Brésilien", "Lutte Libre & Gréco-Romaine", "MMA"], "techniques": [{"id": "boxe-cross", "nom": "Direct du bras arrière (Cross)", "nom_international": "Rear Straight Cross", "discipline": "Boxe Anglaise", "famille": "Percussion (Striking)", "sous_famille": "Poing linéaire", "distance": "Moyenne à longue", "difficulte": 2, "puissance": 5, "risque": 2, "mecanique_levier": "Chaîne cinétique ascendante fermée vers ouverte : poussée plantaire (GRF), rotation axiale pelvienne et scapulaire, projection linéaire avec verrouillage terminal.", "muscles_moteurs": ["Gastrocnémiens et Soléaire", "Quadriceps et Grand fessier", "Obliques interne/externe", "Grand pectoral", "Triceps brachial", "Deltoïde antérieur"], "muscles_stabilisateurs": ["Transverse de l'abdomen", "Érecteurs du rachis", "Dentelé antérieur", "Coiffe des rotateurs"], "cibles_anatomiques": ["Menton (sinus carotidien / axe de rotation crânien)", "Plexus solaire", "Mâchoire"], "failles_biomecaniques": ["Découvrement temporaire de la tempe droite lors de l'extension maximale", "Vulnérabilité au contre en overhand au-dessus du bras avant"], "contres_recommandes": ["Esquive rotative (bob and weave) sous le bras puis crochet au foie", "Slip intérieur et contre-cross simultané", "Duck-under vers amenée au sol (Double leg)"], "donnees_insep": {"force_elite_n": 3158, "force_junior_n": 1021, "vitesse_ms": 8.4, "angle_coude_deg": 112.9, "ratio_grf": "60.6% arrière / 39.4% avant"}}, {"id": "boxe-jab", "nom": "Direct du bras avant (Jab)", "nom_international": "Lead Jab", "discipline": "Boxe Anglaise", "famille": "Percussion (Striking)", "sous_famille": "Poing linéaire", "distance": "Longue", "difficulte": 1, "puissance": 3, "risque": 1, "mecanique_levier": "Levier de vitesse du 3e genre : extension rapide du coude avec rotation médiale de l'avant-bras (pronation), minimisant le déplacement du centre de masse.", "muscles_moteurs": ["Deltoïde antérieur", "Triceps brachial", "Dentelé antérieur", "Pectoral supérieur"], "muscles_stabilisateurs": ["Grand droit de l'abdomen", "Mollet avant"], "cibles_anatomiques": ["Nez", "Menton", "Arcades sourcilières", "Plexus"], "failles_biomecaniques": ["Absence de recul immédiat du bras laissant une ligne de contre ouverte", "Sur-engagement du poids vers l'avant"], "contres_recommandes": ["Parade chassée de la paume droite et direct du droit", "Slip extérieur et uppercut au corps", "Overhand plongeant"], "donnees_insep": {"force_elite_n": 1420, "force_junior_n": 650, "vitesse_ms": 9.8, "angle_coude_deg": 165.0, "ratio_grf": "45% arrière / 55% avant"}}, {"id": "muay-low-kick", "nom": "Coup de pied bas circulaire au tibia (Low Kick)", "nom_international": "Thai Low Kick", "discipline": "Muay-Thaï", "famille": "Percussion (Striking)", "sous_famille": "Jambe circulaire", "distance": "Moyenne", "difficulte": 2, "puissance": 5, "risque": 3, "mecanique_levier": "Couple de rotation centrifuge : pivot à 180° sur la tête métatarsienne d'appui, antéversion et rotation de hanche, percussion avec le tiers distal du tibia.", "muscles_moteurs": ["Iliopsoas et Droit fémoral", "Grand fessier", "Obliques abdominaux", "Quadriceps", "Gastrocnémiens jambe d'appui"], "muscles_stabilisateurs": ["Moyen fessier d'appui", "Tenseur du fascia lata", "Ligament croisé antérieur (préservé par le pivot)"], "cibles_anatomiques": ["Vaste latéral du quadriceps", "Nerf sciatique poplité externe", "Creux poplité"], "failles_biomecaniques": ["Appui unipodal précaire pendant 300 ms", "Exposition au direct plongeant au visage si la garde faiblit"], "contres_recommandes": ["Blocage tibiale à 45° (Check tibio-fémoral)", "Retrait de hanche (Step-back) et riposte en High Kick", "Cross au menton en ligne directe"], "donnees_insep": {"force_elite_n": 3800, "force_junior_n": 1450, "vitesse_ms": 12.2, "angle_coude_deg": 0, "ratio_grf": "Pivot unipodal 100%"}}, {"id": "muay-teep", "nom": "Coup de pied d'arrêt frontal (Teep)", "nom_international": "Front Push Kick (Teep)", "discipline": "Muay-Thaï", "famille": "Percussion (Striking)", "sous_famille": "Jambe linéaire (Piston)", "distance": "Longue", "difficulte": 2, "puissance": 3, "risque": 2, "mecanique_levier": "Action de vérin hydraulique sagittal : flexion de hanche genou groupé, projection pelvienne antéro-postérieure et balancier compensatoire du buste.", "muscles_moteurs": ["Psoas-iliaque", "Droit fémoral", "Quadriceps", "Grand fessier (jambe d'appui)"], "muscles_stabilisateurs": ["Transverse", "Muscles lombaires", "Mollet d'appui"], "cibles_anatomiques": ["Plexus solaire", "Crête iliaque", "Hanche adverse", "Sternum"], "failles_biomecaniques": ["Risque de saisie de cheville par l'adversaire", "Déséquilibre arrière en cas d'esquive latérale"], "contres_recommandes": ["Balayage latéral de la jambe saisie et fauchage de jambe d'appui", "Parade chassée vers l'extérieur et low kick intérieur"], "donnees_insep": {"force_elite_n": 2200, "force_junior_n": 900, "vitesse_ms": 7.5, "angle_coude_deg": 0, "ratio_grf": "Piston sagittal"}}, {"id": "muay-elbow", "nom": "Coup de coude circulaire horizontal (Sok Tad)", "nom_international": "Horizontal Slash Elbow", "discipline": "Muay-Thaï", "famille": "Percussion (Striking)", "sous_famille": "Coude circulaire", "distance": "Courte (Clinch / Corps-à-corps)", "difficulte": 3, "puissance": 5, "risque": 3, "mecanique_levier": "Bras de levier ultra-court minimisant l'inertie et maximisant la vitesse angulaire de rotation scapulo-thoracique.", "muscles_moteurs": ["Grand pectoral", "Deltoïde antérieur", "Grand dorsal", "Obliques"], "muscles_stabilisateurs": ["Trapèze supérieur", "Rhomboïdes", "Muscles spinaux"], "cibles_anatomiques": ["Arcade sourcilière (effet lacérant sur tissus mous)", "Menton", "Pommette", "Tempe"], "failles_biomecaniques": ["Nécessite une entrée à très courte distance exposant aux saisies de nuque et genoux"], "contres_recommandes": ["Blocage bimanuel en double sous-aisselle (Underhooks) et projection", "Esquive arrière du buste (Pull-back) et remise en uppercut"], "donnees_insep": {"force_elite_n": 2950, "force_junior_n": 1100, "vitesse_ms": 11.5, "angle_coude_deg": 35.0, "ratio_grf": "Enracinement court"}}, {"id": "savate-fouette", "nom": "Fouetté figure avec la chaussure", "nom_international": "Savate Whipping Kick (Fouetté)", "discipline": "Savate Boxe Française", "famille": "Percussion (Striking)", "sous_famille": "Jambe circulaire armée", "distance": "Moyenne à longue", "difficulte": 3, "puissance": 4, "risque": 2, "mecanique_levier": "Armé spécifique par flexion de cuisse genou haut, puis détente explosive en fléau distal avec impact de la pointe rigide ou du coup de pied de la chaussure.", "muscles_moteurs": ["Quadriceps (extension terminale)", "Iliopsoas", "Moyen fessier", "Oblique externe"], "muscles_stabilisateurs": ["Spinaux lombaires", "Muscles de la jambe d'appui en extension verrouillée"], "cibles_anatomiques": ["Flanc (foie/rate)", "Tempe", "Mâchoire", "Cuisse"], "failles_biomecaniques": ["Phase d'armé visible offrant une fenêtre d'interception linéaire"], "contres_recommandes": ["Chassé d'arrêt frontal au départ du genou", "Décalage intérieur et direct plongeant"], "donnees_insep": {"force_elite_n": 2600, "force_junior_n": 1050, "vitesse_ms": 13.8, "angle_coude_deg": 0, "ratio_grf": "Impulsion chaussure"}}, {"id": "savate-chasse", "nom": "Chassé latéral d'arrêt", "nom_international": "Savate Side Push Kick (Chassé)", "discipline": "Savate Boxe Française", "famille": "Percussion (Striking)", "sous_famille": "Jambe linéaire profilée", "distance": "Longue", "difficulte": 3, "puissance": 4, "risque": 2, "mecanique_levier": "Piston latéral rectiligne profilé frappant avec le talon de la chaussure, alignant hanche, genou et cheville sur la même ligne de force axiale.", "muscles_moteurs": ["Grand fessier", "Quadriceps", "Ischio-jambiers", "Moyen fessier"], "muscles_stabilisateurs": ["Transverse abdominal", "Obliques", "Muscles du mollet d'appui"], "cibles_anatomiques": ["Plexus", "Foie", "Hanche adverse", "Rotule"], "failles_biomecaniques": ["Profilage du buste réduisant la vision binoculaire sur le flanc opposé"], "contres_recommandes": ["Parade basse en balancier et low kick sur jambe d'appui", "Esquive en pas de côté et crochet large"], "donnees_insep": {"force_elite_n": 2850, "force_junior_n": 1180, "vitesse_ms": 9.2, "angle_coude_deg": 0, "ratio_grf": "Piston latéral talonnier"}}, {"id": "sambo-rytchag-kolena", "nom": "Clé de genou en hyper-extension (Rytchag Kolena)", "nom_international": "Sambo Kneebar", "discipline": "Sambo", "famille": "Préhension (Grappling)", "sous_famille": "Soumission articulaire inférieure", "distance": "Sol / Corps-à-corps", "difficulte": 4, "puissance": 5, "risque": 4, "mecanique_levier": "Levier inter-appui de classe 1 : articulation fémoro-tibiale verrouillée en hyperextension, fulcrum au pubis et traction axiale sur la cheville.", "muscles_moteurs": ["Grands fessiers (pontage pelvien)", "Ischio-jambiers (verrouillage)", "Biceps brachial et Grand dorsal (traction)"], "muscles_stabilisateurs": ["Core abdominal", "Adducteurs (pincement du fémur)"], "cibles_anatomiques": ["Ligament croisé antérieur (LCA)", "Capsule postérieure du genou", "Ménisques"], "failles_biomecaniques": ["Perte de contrôle du bassin adverse permettant une rotation de jambe et prise de dos"], "contres_recommandes": ["Crochet de la jambe libre derrière le genou de l'attaquant (Figure four defense)", "Pontage rotatif et frappes au visage en Sambo Combat"], "donnees_insep": {"force_elite_n": 1900, "force_junior_n": 780, "vitesse_ms": 3.2, "angle_coude_deg": 0, "ratio_grf": "Levier sol"}}, {"id": "sambo-podkhvat", "nom": "Fauchage extérieur avec saisie de kurtka (Podkhvat)", "nom_international": "Sambo Outer Reaping Throw", "discipline": "Sambo", "famille": "Préhension (Grappling)", "sous_famille": "Projection / Fauchage", "distance": "Courte / Clinch", "difficulte": 3, "puissance": 4, "risque": 3, "mecanique_levier": "Déséquilibre (Kuzushi) par traction sur la veste (kurtka) et fauchage puissant de la cuisse avec bascule du haut du corps en couple de torsion.", "muscles_moteurs": ["Grand dorsal", "Biceps brachial", "Grand fessier jambe fauchante", "Ischio-jambiers"], "muscles_stabilisateurs": ["Quadriceps jambe d'appui", "Spinaux lombaires"], "cibles_anatomiques": ["Centre de gravité adverse (déplacement hors de la base de sustentation)"], "failles_biomecaniques": ["Exposition au contre-fauchage en sacrifice arrière (Ura-Nage)"], "contres_recommandes": ["Arrachement arrière en Souplesse (Suplex)", "Blocage du genou adverse et déviation axiale"], "donnees_insep": {"force_elite_n": 3100, "force_junior_n": 1250, "vitesse_ms": 5.4, "angle_coude_deg": 90.0, "ratio_grf": "Couple de torsion"}}, {"id": "wing-chun-lien-wan-kuen", "nom": "Coups de poing en chaîne le long de la ligne centrale (Lien Wan Kuen)", "nom_international": "Wing Chun Chain Punches", "discipline": "Wing Chun", "famille": "Percussion (Striking)", "sous_famille": "Poing vertical continu", "distance": "Courte à moyenne", "difficulte": 2, "puissance": 3, "risque": 2, "mecanique_levier": "Coups de poing verticaux à trajectoire axiale stricte le long du méridien sagittal médian, rotation en moulinet avec coudes rentrés.", "muscles_moteurs": ["Triceps brachial", "Deltoïde antérieur", "Dentelé antérieur"], "muscles_stabilisateurs": ["Trapèze moyen", "Transverse de l'abdomen (posture Yee Jee Kim Yeung Ma)"], "cibles_anatomiques": ["Nez", "Plexus", "Gorge", "Sternum"], "failles_biomecaniques": ["Manque de puissance unitaire comparativement à une chaîne cinétique rotative avec hanche", "Vulnérabilité aux crochets larges extérieurs"], "contres_recommandes": ["Crochet large (Hook) contournant la ligne centrale", "Blocage en coquille et clinch avec genou", "Takedown aux jambes sous la pluie de coups"], "donnees_insep": {"force_elite_n": 1100, "force_junior_n": 520, "vitesse_ms": 11.2, "angle_coude_deg": 140.0, "ratio_grf": "Haute fréquence 6 Hz"}}, {"id": "wing-chun-pak-sao", "nom": "Déviation réflexe paume ouverte (Pak Sao)", "nom_international": "Wing Chun Slapping Block (Pak Sao)", "discipline": "Wing Chun", "famille": "Interception & Déviation", "sous_famille": "Parade dynamique", "distance": "Moyenne à courte", "difficulte": 2, "puissance": 2, "risque": 1, "mecanique_levier": "Interception vectorielle perpendiculaire au poing adverse pour dévier sa trajectoire avec un coût énergétique minimal tout en ouvrant l'angle de frappe simultanée.", "muscles_moteurs": ["Grand pectoral", "Rond pronateur", "Dentelé antérieur"], "muscles_stabilisateurs": ["Deltoïde postérieur", "Rhomboïdes"], "cibles_anatomiques": ["Poignet / avant-bras adverse (déviation d'axe)"], "failles_biomecaniques": ["Inefficace face à des trajectoires courbes (crochets, overhands)"], "contres_recommandes": ["Feinte de direct avant suivie d'un crochet descendant", "Frappe en marteau au flanc"], "donnees_insep": {"force_elite_n": 650, "force_junior_n": 310, "vitesse_ms": 12.0, "angle_coude_deg": 115.0, "ratio_grf": "Déviation tangentielle"}}, {"id": "judo-morote-seoi-nage", "nom": "Projection d'épaule à deux mains (Morote Seoi-Nage)", "nom_international": "Two-Hand Shoulder Throw", "discipline": "Judo", "famille": "Préhension (Grappling)", "sous_famille": "Projection par-dessus l'épaule", "distance": "Corps-à-corps (Kumi-kata)", "difficulte": 4, "puissance": 5, "risque": 3, "mecanique_levier": "Levier de bascule de classe 1 : Kuzushi (déséquilibre avant), Tsukuri (abaissement du centre de masse sous celui de l'adversaire) et Kake (extension explosive des jambes et enroulement dorsal).", "muscles_moteurs": ["Quadriceps et Fessiers (extension puissante)", "Grand dorsal et Biceps (traction du revers/manche)", "Spinaux (enroulement)"], "muscles_stabilisateurs": ["Ceinture abdominale", "Deltoïdes"], "cibles_anatomiques": ["Centre de gravité adverse projeté au sol"], "failles_biomecaniques": ["Exposition du dos en cas de blocage de hanche par l'adversaire"], "contres_recommandes": ["Esquive de hanche par l'arrière et contre en Te-Guruma", "Ceinture arrière et contre-projection (Ushiro-Goshi)"], "donnees_insep": {"force_elite_n": 3600, "force_junior_n": 1300, "vitesse_ms": 6.2, "angle_coude_deg": 85.0, "ratio_grf": "Extension bipodale 100%"}}, {"id": "judo-o-soto-gari", "nom": "Grand fauchage extérieur (O-Soto-Gari)", "nom_international": "Major Outer Reaping", "discipline": "Judo", "famille": "Préhension (Grappling)", "sous_famille": "Fauchage direct", "distance": "Courte / Kumi-kata", "difficulte": 3, "puissance": 5, "risque": 3, "mecanique_levier": "Création d'un déséquilibre diagonal arrière droit chez l'adversaire, fixation de tout son poids sur son talon, puis fauchage par balancier de jambe.", "muscles_moteurs": ["Ischio-jambiers et Grand fessier (jambe fauchante)", "Pectoraux et Grand dorsal (poussée/traction du col)", "Quadriceps jambe d'appui"], "muscles_stabilisateurs": ["Transverse abdominal", "Moyen fessier d'appui"], "cibles_anatomiques": ["Jambe d'appui adverse fauchée au creux poplité"], "failles_biomecaniques": ["Si le déséquilibre est incomplet, vulnérabilité extrême au contre-fauchage (O-Soto-Gaeshi)"], "contres_recommandes": ["Contre-fauchage O-Soto-Gaeshi par transfert d'appui immédiat", "Esquive en dérobant la jambe et fauchage de soutien"], "donnees_insep": {"force_elite_n": 3400, "force_junior_n": 1200, "vitesse_ms": 5.8, "angle_coude_deg": 95.0, "ratio_grf": "Fauchage diagonal"}}, {"id": "karate-mae-geri", "nom": "Coup de pied de face fouetté ou pénétrant (Mae-Geri Keage / Kekomi)", "nom_international": "Karate Front Snap/Thrust Kick", "discipline": "Karaté", "famille": "Percussion (Striking)", "sous_famille": "Jambe linéaire axiale", "distance": "Moyenne à longue", "difficulte": 2, "puissance": 4, "risque": 2, "mecanique_levier": "Armé rapide du genou au plexus, extension violente de la jambe avec percussion par le koshi (coussinet plantaire sous les orteils relevés).", "muscles_moteurs": ["Quadriceps", "Iliopsoas", "Fléchisseurs des orteils", "Grand fessier jambe d'appui"], "muscles_stabilisateurs": ["Abdominaux (gainage)", "Mollet d'appui"], "cibles_anatomiques": ["Plexus solaire", "Foie", "Menton", "Testicules / Vessie"], "failles_biomecaniques": ["Trajectoire axiale prévisible facilement balayée latéralement"], "contres_recommandes": ["Blocage Gedan Barai et contre en Gyaku-Zuki", "Saisie de cheville et fauchage de la jambe d'appui"], "donnees_insep": {"force_elite_n": 2450, "force_junior_n": 980, "vitesse_ms": 12.5, "angle_coude_deg": 0, "ratio_grf": "Impulsion koshi"}}, {"id": "jjb-armbar", "nom": "Clé de bras en croix (Juji-Gatame / Armbar)", "nom_international": "Cross-body Armlock", "discipline": "Jiu-Jitsu Brésilien", "famille": "Préhension (Grappling)", "sous_famille": "Soumission articulaire supérieure", "distance": "Sol (Garde, Montée ou Dos)", "difficulte": 3, "puissance": 5, "risque": 3, "mecanique_levier": "Levier inter-appui de classe 1 parfait : le pubis agit comme point d'appui (fulcrum), les mains tractent l'extrémité du levier (poignet adverse avec pouce vers le haut), et l'extension pelvienne (F_pontage) applique la force perpendiculaire au coude.", "muscles_moteurs": ["Grands fessiers et Ischio-jambiers (pontage)", "Adducteurs (serrage des cuisses)", "Biceps et Grands dorsaux (traction)"], "muscles_stabilisateurs": ["Transverse et Obliques (maintien du bassin)", "Érecteurs du rachis"], "cibles_anatomiques": ["Capsule articulaire du coude", "Tendon distal du biceps", "Ligament collatéral ulnaire"], "failles_biomecaniques": ["Si les genoux ne sont pas resserrés, l'adversaire peut tourner le coude et passer la garde (Hitchhiker escape)"], "contres_recommandes": ["Hitchhiker escape par rotation interne du bras et pontage circulaire", "Stack pass (écrasement du bassin de l'attaquant contre ses cervicales)"], "donnees_insep": {"force_elite_n": 2100, "force_junior_n": 820, "vitesse_ms": 2.8, "angle_coude_deg": 180.0, "ratio_grf": "Levier classe 1 au pubis"}}, {"id": "jjb-guillotine", "nom": "Étranglement avant en guillotine (Guillotine Choke)", "nom_international": "Front Headlock Guillotine Choke", "discipline": "Jiu-Jitsu Brésilien", "famille": "Préhension (Grappling)", "sous_famille": "Étranglement sanguin / respiratoire", "distance": "Clinch ou Sol (Garde fermée)", "difficulte": 2, "puissance": 5, "risque": 3, "mecanique_levier": "Étau cervical : le radius s'insère sous la trachée ou comprime la carotide, compression axiale par fermeture de la garde fermée avec extension du tronc.", "muscles_moteurs": ["Biceps brachial", "Grand dorsal", "Grands droits et fléchisseurs du cou", "Psoas-iliaque (garde fermée)"], "muscles_stabilisateurs": ["Rhomboïdes", "Trapèzes"], "cibles_anatomiques": ["Artère carotide primitive (hypoxie cérébrale en 6-8 s)", "Cartilage thyroïde"], "failles_biomecaniques": ["En cas d'échec en garde ouverte, l'adversaire bascule en contrôle latéral (Von Flue choke)"], "contres_recommandes": ["Von Flue choke en sautant en garde latérale opposée avec pression d'épaule sur la gorge", "Saisie du poignet attaquant pour soulager la pression et redressement de nuque"], "donnees_insep": {"force_elite_n": 1850, "force_junior_n": 750, "vitesse_ms": 2.5, "angle_coude_deg": 45.0, "ratio_grf": "Compression carotide"}}, {"id": "lutte-double-leg", "nom": "Amenée au sol sur deux jambes (Double Leg Takedown)", "nom_international": "Double Leg Takedown (Morote-Gari)", "discipline": "Lutte Libre & Gréco-Romaine", "famille": "Préhension (Grappling)", "sous_famille": "Changement de niveau et fauchage", "distance": "Moyenne vers corps-à-corps", "difficulte": 3, "puissance": 5, "risque": 3, "mecanique_levier": "Abaissement explosif du centre de gravité (Level change), pénétration axiale du genou au sol, impact d'épaule au plexus/bassin et traction simultanée des creux poplités pour faucher la base adverse.", "muscles_moteurs": ["Quadriceps et Grands fessiers (propulsion explosive)", "Ischio-jambiers", "Deltoïde antérieur et Pectoraux (poussée d'épaule)", "Biceps (verrouillage des genoux)"], "muscles_stabilisateurs": ["Core abdominal complet", "Muscles du cou et érecteurs du rachis"], "cibles_anatomiques": ["Creux poplités (fauchage de la base de sustentation)", "Bassin"], "failles_biomecaniques": ["Tête exposée à une guillotine réflexe ou à un coup de genou sauté si la trajectoire est trop prévisible"], "contres_recommandes": ["Sprawl explosif avec recul des hanches et pression de poitrine sur la nuque", "Coup de genou sauté d'interception", "Prise de guillotine"], "donnees_insep": {"force_elite_n": 3900, "force_junior_n": 1600, "vitesse_ms": 6.8, "angle_coude_deg": 90.0, "ratio_grf": "Propulsion horizontale 100%"}}, {"id": "mma-ground-and-pound", "nom": "Frappes au sol depuis la garde ou la montée (Ground and Pound)", "nom_international": "Ground and Pound (GnP)", "discipline": "MMA", "famille": "Hybride (Striking au sol)", "sous_famille": "Percussion pesante asistée par la gravité", "distance": "Sol (Position dominante)", "difficulte": 3, "puissance": 5, "risque": 2, "mecanique_levier": "Combinaison de la chaîne cinétique descendante et du poids corporel libre accéléré par la gravité ( = 9.81\\text{ m/s}^2$) contre une cible immobilisée sur la surface dure du tapis.", "muscles_moteurs": ["Grand pectoral", "Triceps", "Grand fessier et spinaux (posture redressée)", "Obliques"], "muscles_stabilisateurs": ["Adducteurs et genoux maintenant le contrôle de hanche adverse"], "cibles_anatomiques": ["Menton", "Pommettes", "Côtes flottantes"], "failles_biomecaniques": ["Perte de posture vers l'avant permettant un renversement en pontage (Upa) ou clé de bras"], "contres_recommandes": ["Contrôle des poignets (Biceps ride), pontage explosif (Upa) vers la garde ou tentative de clé de bras (Armbar)"], "donnees_insep": {"force_elite_n": 3250, "force_junior_n": 1200, "vitesse_ms": 7.9, "angle_coude_deg": 105.0, "ratio_grf": "Poids gravité + impulsion"}}]};
+
+    // Navigation entre les 9 onglets
+    // Navigation Synchronisée Desktop & Mobile
+    function switchNav(tabId) {
+      const sections = ['lab3d', 'duel', 'avatars', 'kickboxing', 'encyclo', 'tactique', 'timer', 'dojo', 'fighters'];
+      sections.forEach(s => {
+        const el = document.getElementById('section-' + s);
+        const btn = document.getElementById('nav-' + s);
+        const mobBtn = document.getElementById('mob-' + s);
+
+        if (s === tabId) {
+          el.classList.remove('hidden');
+          if (btn) {
+            btn.classList.add('tab-btn-active');
+            btn.classList.remove('text-slate-400');
+          }
+          if (mobBtn) {
+            mobBtn.classList.add('mob-tab-active');
+            mobBtn.classList.remove('text-slate-400');
+          }
+        } else {
+          el.classList.add('hidden');
+          if (btn) {
+            btn.classList.remove('tab-btn-active');
+            btn.classList.add('text-slate-400');
+          }
+          if (mobBtn) {
+            mobBtn.classList.remove('mob-tab-active');
+            mobBtn.classList.add('text-slate-400');
+          }
+        }
+      });
+
+      // Redimensionnement fluide si retour sur le labo 3D
+      if (tabId === 'lab3d') {
+        setTimeout(resizeCanvas, 50);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ==========================================
+    // GESTION DU PLEIN ÉCRAN & WAKELOCK (MOBILE & PC)
+    // ==========================================
+    let wakeLock = null;
+
+    async function requestWakeLock() {
+      if ('wakeLock' in navigator) {
+        try {
+          wakeLock = await navigator.wakeLock.request('screen');
+        } catch(e) {
+          console.warn('WakeLock non supporté:', e);
+        }
+      }
+    }
+
+    function releaseWakeLock() {
+      if (wakeLock) {
+        wakeLock.release().then(() => { wakeLock = null; });
+      }
+    }
+
+    function toggleAppFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        const icon = document.getElementById('fullscreenIcon');
+        if (icon) icon.innerText = '⤓';
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+          const icon = document.getElementById('fullscreenIcon');
+          if (icon) icon.innerText = '⛶';
+        }
+      }
+    }
+
+    // Déverrouillage Audio Mobile (iOS / Android AudioContext Resume sur premier toucher)
+    let audioUnlocked = false;
+    function unlockAudioOnFirstTouch() {
+      if (audioUnlocked) return;
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        audioUnlocked = true;
+      } catch(e) {}
+      window.removeEventListener('touchstart', unlockAudioOnFirstTouch);
+      window.removeEventListener('click', unlockAudioOnFirstTouch);
+    }
+    window.addEventListener('touchstart', unlockAudioOnFirstTouch, { passive: true });
+    window.addEventListener('click', unlockAudioOnFirstTouch, { passive: true });
+
+    // ==========================================
+    // MOTEUR CANVAS 3D ET CINÉMATIQUE SÉQUENTIELLE
+    // ==========================================
+    const canvas = document.getElementById('canvas3d');
+    const ctx = canvas.getContext('2d');
+
+    let currentTech = 'cross';
+    let isPlaying = true;
+    let animProgress = 80;
+    let animSpeed = 1.0;
+    let lastTimestamp = 0;
+
+    let hudLayers = {
+      skeleton: true,
+      forces: true,
+      polygon: true,
+      com: true,
+      angles: true
+    };
+
+    // Angles sphériques de caméra
+    let camTheta = 45 * Math.PI / 180;
+    let camPhi = 22 * Math.PI / 180;
+    let camDistance = 3.8;
+
+    // Redimensionnement dynamique Haute Définition (Retina & écrans 4K/Mobile)
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+      }
+    }
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', resizeCanvas);
+
+    // Contrôles Souris (PC Desktop)
+    let isDragging = false;
+    let dragStartX = 0, dragStartY = 0;
+
+    canvas.addEventListener('mousedown', e => {
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => isDragging = false);
+
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+
+      camTheta -= dx * 0.008;
+      camPhi += dy * 0.008;
+      camPhi = Math.max(-0.2, Math.min(Math.PI / 2 - 0.05, camPhi));
+
+      clearActiveCamButtons();
+      updateCameraBadge();
+    });
+
+    // Contrôles Tactiles (Téléphones & Tablettes)
+    let touchStartX = 0, touchStartY = 0;
+    let touchInitialDistance = 0;
+
+    canvas.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      } else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        touchInitialDistance = Math.hypot(dx, dy);
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault(); // Empêcher le défilement de page pendant la rotation 3D
+      if (e.touches.length === 1) {
+        const dx = e.touches[0].clientX - touchStartX;
+        const dy = e.touches[0].clientY - touchStartY;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+
+        camTheta -= dx * 0.01;
+        camPhi += dy * 0.01;
+        camPhi = Math.max(-0.2, Math.min(Math.PI / 2 - 0.05, camPhi));
+
+        clearActiveCamButtons();
+        updateCameraBadge();
+      } else if (e.touches.length === 2) {
+        // Zoom tactile par pincement (Pinch-to-zoom)
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const diff = dist - touchInitialDistance;
+        touchInitialDistance = dist;
+
+        camDistance = Math.max(2.0, Math.min(6.5, camDistance - diff * 0.01));
+      }
+    }, { passive: false });
+
+    // Raccourcis Clavier (Expérience PC Pro)
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeTechModal();
+        return;
+      }
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+      } else if (['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6'].includes(e.code)) {
+        const idx = parseInt(e.code.replace('Digit', '')) - 1;
+        const phasesVals = [0, 20, 40, 60, 80, 100];
+        jumpToPhase(phasesVals[idx]);
+      } else if (e.key.toLowerCase() === 'c') {
+        const cams = ['iso', 'zenith', 'front', 'back', 'left', 'right'];
+        const curBtn = document.querySelector('.cam-btn-active');
+        const curIdx = cams.indexOf(curBtn ? curBtn.id.replace('cam-', '') : 'iso');
+        const nextCam = cams[(curIdx + 1) % cams.length];
+        setCameraView(nextCam);
+      } else if (e.key.toLowerCase() === 't') {
+        toggleTimer();
+      } else if (e.key.toLowerCase() === 'r') {
+        resetAnim();
+      }
+    });
+
+    function setCameraView(view) {
+      clearActiveCamButtons();
+      const btn = document.getElementById('cam-' + view);
+      if (btn) btn.classList.add('cam-btn-active');
+
+      switch(view) {
+        case 'zenith': camTheta = 90 * Math.PI / 180; camPhi = 85 * Math.PI / 180; break;
+        case 'back': camTheta = 270 * Math.PI / 180; camPhi = 15 * Math.PI / 180; break;
+        case 'left': camTheta = 180 * Math.PI / 180; camPhi = 15 * Math.PI / 180; break;
+        case 'right': camTheta = 0 * Math.PI / 180; camPhi = 15 * Math.PI / 180; break;
+        case 'front': camTheta = 90 * Math.PI / 180; camPhi = 10 * Math.PI / 180; break;
+        case 'iso': camTheta = 45 * Math.PI / 180; camPhi = 22 * Math.PI / 180; break;
+      }
+      updateCameraBadge();
+    }
+
+    function clearActiveCamButtons() {
+      document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('cam-btn-active'));
+    }
+
+    function updateCameraBadge() {
+      const azDeg = Math.round((camTheta * 180 / Math.PI) % 360);
+      const elDeg = Math.round(camPhi * 180 / Math.PI);
+      const badge = document.getElementById('camBadge');
+      if (badge) badge.innerText = `CAMÉRA : ORBITE 3D (Az ${azDeg}° | El ${elDeg}°)`;
+    }
+
+    function toggleHudLayer(layer, value) {
+      hudLayers[layer] = value;
+    }
+
+    function onScrub(val) {
+      animProgress = parseFloat(val);
+      updatePhaseUI();
+    }
+
+    function jumpToPhase(val) {
+      animProgress = val;
+      document.getElementById('timeScrubber').value = val;
+      updatePhaseUI();
+    }
+
+    function updatePhaseUI() {
+      const pct = animProgress;
+      document.getElementById('timePct').innerText = `Progression : ${Math.round(pct)}%`;
+
+      const phases = [
+        { max: 15, name: '1. Position de Garde & Équilibre', exp: 'Posture de base, répartition du poids 50/50, garde haute préservant le menton et vision binoculaire.' },
+        { max: 35, name: '2. Poussée Plantaire au Sol (GRF)', exp: 'Impulsion explosive du pied arrière (Ground Reaction Force). Le sol renvoie une force ascendante amorçant la chaîne.' },
+        { max: 55, name: '3. Torsion Pelvienne & Tronc', exp: 'Rotation du bassin relayée par les abdominaux obliques et le transverse. Transfert du couple rotatif vers la ceinture scapulaire.' },
+        { max: 75, name: '4. Déploiement Scapulaire & Bras', exp: 'Extension balistique du coude avec pronation de l avant-bras. Le membre accélère le long de sa trajectoire terminale.' },
+        { max: 90, name: '5. Impact & Raideur de Cocontraction', exp: 'Synchronisation réflexe agoniste-antagoniste (Δt ≈ 18 ms) verrouillant le membre pour une masse effective de 32 kg.' },
+        { max: 100, name: '6. Recouvrement & Retour en Garde', exp: 'Traction élastique des antagonistes pour ramener le poing ou le pied en protection sans exposition aux contre-attaques.' }
+      ];
+
+      let currentP = phases[phases.length - 1];
+      for (let p of phases) {
+        if (pct <= p.max) { currentP = p; break; }
+      }
+
+      document.getElementById('phaseText').innerText = currentP.name;
+      document.getElementById('phaseExplanationText').innerText = currentP.exp;
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('playBtn');
+      btn.innerText = isPlaying ? '⏸ PAUSE' : '▶ LECTURE CONTINUE';
+    }
+
+    function resetAnim() {
+      animProgress = 0;
+      document.getElementById('timeScrubber').value = 0;
+      updatePhaseUI();
+    }
+
+    function setSpeed(s) {
+      animSpeed = s;
+      document.querySelectorAll('.speed-btn').forEach(b => {
+        b.classList.remove('bg-cyan-600', 'font-bold');
+        b.classList.add('bg-slate-800');
+      });
+      if (event && event.target) {
+        event.target.classList.remove('bg-slate-800');
+        event.target.classList.add('bg-cyan-600', 'font-bold');
+      }
+    }
+
+    function loadTechnique3D(techKey) {
+      currentTech = techKey;
+      resetAnim();
+      isPlaying = true;
+      document.getElementById('playBtn').innerText = '⏸ PAUSE';
+    }
+
+    // MODÉLISATION GÉOMÉTRIQUE DU SQUELETTE TRIDIMENSIONNEL
+    function get3DSkeleton(tech, progress) {
+      const t = progress / 100;
+      let hipX = 0, hipY = 0.95, hipZ = 0;
+      let shoulderX = 0, shoulderY = 1.45, shoulderZ = 0;
+
+      // Poussée et rotation en fonction du coup
+      let hipAngle = 0;
+      let shoulderAngle = 0;
+      let handRight = { x: 0.18, y: 1.45, z: 0.25 };
+      let handLeft = { x: -0.18, y: 1.45, z: 0.25 };
+      let footRight = { x: 0.22, y: 0, z: -0.28 };
+      let footLeft = { x: -0.22, y: 0, z: 0.25 };
+
+      if (tech === 'cross') {
+        hipAngle = t * 0.75;
+        shoulderAngle = t * 1.15;
+        const reach = t * 0.82;
+        handRight = {
+          x: 0.18 * Math.cos(shoulderAngle) + reach * Math.sin(shoulderAngle),
+          y: 1.45 - t * 0.05,
+          z: 0.25 + reach * Math.cos(shoulderAngle)
+        };
+        footRight.z = -0.28 + t * 0.06;
+      } else if (tech === 'teep') {
+        hipY = 0.95 + t * 0.05;
+        shoulderZ = -t * 0.25;
+        const reachLeg = t * 1.05;
+        footRight = {
+          x: 0.05,
+          y: 0.1 + t * 0.95,
+          z: reachLeg
+        };
+      } else if (tech === 'hook') {
+        shoulderAngle = t * 1.4;
+        handRight = {
+          x: -0.35 + Math.sin(shoulderAngle) * 0.6,
+          y: 1.45,
+          z: 0.4 + Math.cos(shoulderAngle) * 0.3
+        };
+      } else if (tech === 'lowkick') {
+        // Pivot 180°
+        const pivotAngle = t * Math.PI;
+        footLeft.angle = pivotAngle;
+        footRight = {
+          x: Math.sin(t * 2.2) * 0.85,
+          y: 0.45 - t * 0.1,
+          z: Math.cos(t * 2.2) * 0.7
+        };
+      } else if (tech === 'armbar') {
+        // Sol Levier de classe 1
+        hipY = 0.2 + t * 0.35; // Pontage
+        shoulderY = 0.15;
+        handRight = { x: 0.1, y: 0.25 + t * 0.4, z: 0.4 };
+        handLeft = { x: -0.1, y: 0.25 + t * 0.4, z: 0.4 };
+      } else if (tech === 'doubleleg') {
+        // Abaissement de niveau explosif
+        hipY = 0.95 - t * 0.55;
+        shoulderY = 1.45 - t * 0.65;
+        shoulderZ = t * 0.75;
+        handRight = { x: 0.25, y: 0.3, z: shoulderZ + 0.35 };
+        handLeft = { x: -0.25, y: 0.3, z: shoulderZ + 0.35 };
+      }
+
+      return {
+        head: { x: shoulderX, y: shoulderY + 0.28, z: shoulderZ },
+        neck: { x: shoulderX, y: shoulderY + 0.12, z: shoulderZ },
+        shoulderR: { x: 0.22, y: shoulderY, z: shoulderZ - 0.05 },
+        shoulderL: { x: -0.22, y: shoulderY, z: shoulderZ + 0.05 },
+        elbowR: { x: (0.22 + handRight.x) / 2, y: shoulderY - 0.15, z: (shoulderZ + handRight.z) / 2 },
+        elbowL: { x: -0.25, y: shoulderY - 0.2, z: 0.2 },
+        handR: handRight,
+        handL: handLeft,
+        pelvis: { x: hipX, y: hipY, z: hipZ },
+        kneeR: { x: (hipX + footRight.x) / 2, y: hipY * 0.5, z: footRight.z * 0.6 },
+        kneeL: { x: (hipX + footLeft.x) / 2, y: hipY * 0.55, z: footLeft.z * 0.6 },
+        footR: footRight,
+        footL: footLeft,
+        com: { x: hipX * 0.6, y: hipY * 1.05, z: (footLeft.z + footRight.z) * 0.35 }
+      };
+    }
+
+    // Projection perspective 3D vers 2D
+    function project3D(p) {
+      const cx = Math.cos(camTheta), sx = Math.sin(camTheta);
+      const cy = Math.cos(camPhi), sy = Math.sin(camPhi);
+
+      // Rotation Y
+      const x1 = p.x * cx - p.z * sx;
+      const z1 = p.x * sx + p.z * cx;
+
+      // Rotation X
+      const y2 = p.y * cy - z1 * sy;
+      const z2 = p.y * sy + z1 * cy + camDistance;
+
+      const fov = 480;
+      const screenX = canvas.width / 2 + (x1 / z2) * fov;
+      const screenY = canvas.height / 2 - (y2 / z2) * fov + 80;
+
+      return { x: screenX, y: screenY, z: z2 };
+    }
+
+    // Rendu Canvas Principal
+    function draw3DScene() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Grille de sol
+      draw3DGrid();
+
+      const skel = get3DSkeleton(currentTech, animProgress);
+      const prj = {};
+      for (let k in skel) {
+        prj[k] = project3D(skel[k]);
+      }
+
+      // Polygone de sustentation (Vert néon)
+      if (hudLayers.polygon) {
+        ctx.beginPath();
+        ctx.moveTo(prj.footL.x, prj.footL.y);
+        ctx.lineTo(prj.footR.x, prj.footR.y);
+        ctx.strokeStyle = 'rgba(0, 230, 118, 0.4)';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(0, 230, 118, 0.15)';
+        ctx.beginPath();
+        ctx.ellipse((prj.footL.x + prj.footR.x)/2, (prj.footL.y + prj.footR.y)/2, 60, 25, 0, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      // Segments squelettiques (Cyan #00CED1)
+      if (hudLayers.skeleton) {
+        ctx.strokeStyle = '#00CED1';
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+
+        const bones = [
+          ['head', 'neck'], ['neck', 'shoulderR'], ['neck', 'shoulderL'],
+          ['shoulderR', 'elbowR'], ['elbowR', 'handR'],
+          ['shoulderL', 'elbowL'], ['elbowL', 'handL'],
+          ['neck', 'pelvis'],
+          ['pelvis', 'kneeR'], ['kneeR', 'footR'],
+          ['pelvis', 'kneeL'], ['kneeL', 'footL']
+        ];
+
+        for (let b of bones) {
+          ctx.beginPath();
+          ctx.moveTo(prj[b[0]].x, prj[b[0]].y);
+          ctx.lineTo(prj[b[1]].x, prj[b[1]].y);
+          ctx.stroke();
+        }
+
+        // Nœuds Mocap luminescents
+        for (let k in prj) {
+          if (k === 'com') continue;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath();
+          ctx.arc(prj[k].x, prj[k].y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Vecteurs de Force GRF (Orange #FF6B35)
+      if (hudLayers.forces) {
+        ctx.strokeStyle = '#FF6B35';
+        ctx.fillStyle = '#FF6B35';
+        ctx.lineWidth = 3;
+
+        // Force d'impulsion pied arrière
+        const arrowLen = 50 * (animProgress / 100);
+        ctx.beginPath();
+        ctx.moveTo(prj.footR.x, prj.footR.y);
+        ctx.lineTo(prj.footR.x - 25, prj.footR.y - arrowLen);
+        ctx.stroke();
+
+        // Flèche impact poing droit
+        if (animProgress > 60) {
+          ctx.beginPath();
+          ctx.moveTo(prj.handR.x, prj.handR.y);
+          ctx.lineTo(prj.handR.x + 40, prj.handR.y);
+          ctx.stroke();
+        }
+      }
+
+      // Centre de Masse (CoM en 4 quadrants Votre EPS)
+      if (hudLayers.com && prj.com) {
+        const r = 10;
+        const x = prj.com.x, y = prj.com.y;
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#FFD700';
+        ctx.fill();
+
+        ctx.fillStyle = '#030712';
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, r, 0, Math.PI / 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, r, Math.PI, Math.PI * 1.5);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function draw3DGrid() {
+      ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+      ctx.lineWidth = 1;
+      const size = 3;
+      const step = 0.6;
+      for (let x = -size; x <= size; x += step) {
+        const p1 = project3D({ x: x, y: 0, z: -size });
+        const p2 = project3D({ x: x, y: 0, z: size });
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+      for (let z = -size; z <= size; z += step) {
+        const p1 = project3D({ x: -size, y: 0, z: z });
+        const p2 = project3D({ x: size, y: 0, z: z });
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+    }
+
+    // Boucle d'animation
+    function animLoop(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const delta = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      if (isPlaying) {
+        animProgress += delta * 45 * animSpeed;
+        if (animProgress > 100) animProgress = 0;
+        document.getElementById('timeScrubber').value = animProgress;
+        updatePhaseUI();
+      }
+
+      draw3DScene();
+      requestAnimationFrame(animLoop);
+    }
+    requestAnimationFrame(animLoop);
+
+    // ==========================================
+    // SIMULATEUR DE DUEL TACTIQUE (A vs B)
+    // ==========================================
+    function initDuelSelectors() {
+      const selA = document.getElementById('duelSelectA');
+      const selB = document.getElementById('duelSelectB');
+      selA.innerHTML = '';
+      selB.innerHTML = '';
+
+      DATASET.techniques.forEach(t => {
+        const optA = document.createElement('option');
+        optA.value = t.id;
+        optA.innerText = `${t.nom} (${t.discipline})`;
+        selA.appendChild(optA);
+
+        const optB = document.createElement('option');
+        optB.value = t.id;
+        optB.innerText = `${t.nom} (${t.discipline})`;
+        selB.appendChild(optB);
+      });
+
+      selA.value = 'boxe-cross';
+      selB.value = 'lutte-double-leg';
+      runDuelSimulation();
+    }
+
+    function runDuelSimulation() {
+      const idA = document.getElementById('duelSelectA').value;
+      const idB = document.getElementById('duelSelectB').value;
+      const techA = DATASET.techniques.find(t => t.id === idA);
+      const techB = DATASET.techniques.find(t => t.id === idB);
+
+      if (!techA || !techB) return;
+
+      // Afficher fiches résumées
+      document.getElementById('duelInfoA').innerHTML = `
+        <div><strong>Discipline :</strong> ${techA.discipline}</div>
+        <div><strong>Distance :</strong> ${techA.distance}</div>
+        <div><strong>Puissance :</strong> ${techA.puissance} / 5 • <strong>Difficulté :</strong> ${techA.difficulte} / 5</div>
+        <div class="text-rose-400"><strong>Faille :</strong> ${techA.failles_biomecaniques[0] || 'N/A'}</div>
+      `;
+
+      document.getElementById('duelInfoB').innerHTML = `
+        <div><strong>Discipline :</strong> ${techB.discipline}</div>
+        <div><strong>Distance :</strong> ${techB.distance}</div>
+        <div><strong>Puissance :</strong> ${techB.puissance} / 5 • <strong>Difficulté :</strong> ${techB.difficulte} / 5</div>
+        <div class="text-rose-400"><strong>Faille :</strong> ${techB.failles_biomecaniques[0] || 'N/A'}</div>
+      `;
+
+      // Calcul de l'avantage décisionnel
+      let scoreA = 50, scoreB = 50;
+      let flawExploited = false;
+      let flawDetail = '';
+
+      // Test si B contre spécifiquement A
+      const countersA = (techA.contres_recommandes || []).join(' ').toLowerCase();
+      const nomB = techB.nom.toLowerCase();
+      const discB = techB.discipline.toLowerCase();
+
+      if (countersA.includes('double leg') && idB === 'lutte-double-leg') {
+        scoreB += 30; scoreA -= 30;
+        flawExploited = true;
+        flawDetail = "Combattant B plonge sous la frappe haute en Double Leg Takedown.";
+      } else if (countersA.includes('armbar') && idB === 'jjb-armbar') {
+        scoreB += 25; scoreA -= 25;
+        flawExploited = true;
+        flawDetail = "Combattant B saisit le bras étendu et enroule en Armbar.";
+      } else if (techA.distance.includes('Longue') && techB.distance.includes('Sol')) {
+        scoreA += 15; scoreB -= 15;
+      }
+
+      // Ajustement par puissance et risque
+      scoreA += (techA.puissance - techA.risque) * 3;
+      scoreB += (techB.puissance - techB.risque) * 3;
+
+      scoreA = Math.max(10, Math.min(90, scoreA));
+      scoreB = 100 - scoreA;
+
+      document.getElementById('duelPctA').innerText = `Combattant A : ${scoreA}%`;
+      document.getElementById('duelPctB').innerText = `Combattant B : ${scoreB}%`;
+      document.getElementById('duelBarA').style.width = scoreA + '%';
+      document.getElementById('duelBarB').style.width = scoreB + '%';
+
+      const pill = document.getElementById('duelVerdictPill');
+      if (scoreA > scoreB) {
+        pill.className = 'px-3 py-1 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+        pill.innerText = "AVANTAGE DÉCISIONNEL COMBATTANT A";
+      } else if (scoreB > scoreA) {
+        pill.className = 'px-3 py-1 rounded-full text-xs font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+        pill.innerText = "AVANTAGE DÉCISIONNEL COMBATTANT B";
+      } else {
+        pill.className = 'px-3 py-1 rounded-full text-xs font-mono font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-500/40';
+        pill.innerText = "COLLISION SYMÉTRIQUE / TIMING NEUTRE";
+      }
+
+      document.getElementById('duelDistAnalysis').innerText = `${techA.distance} vs ${techB.distance}`;
+      document.getElementById('duelSpeedAnalysis').innerText = `Vitesse estimée : ${techA.donnees_insep ? techA.donnees_insep.vitesse_ms + ' m/s' : 'N/A'} vs ${techB.donnees_insep ? techB.donnees_insep.vitesse_ms + ' m/s' : 'N/A'}`;
+      document.getElementById('duelFlawAnalysis').innerText = flawExploited ? flawDetail : "Interception géométrique standard.";
+      document.getElementById('duelDetailedVerdict').innerText = `Analyse tactique : ${techA.nom} (${techA.discipline}) contre ${techB.nom} (${techB.discipline}). ${flawExploited ? 'La faille cinématique est directement exploitée par le combattant B qui dispose du contre idéal.' : 'L issue repose sur la précision du premier appui GRF et la conservation du polygone de sustentation.'}`;
+    }
+
+    // ==========================================
+    // ENCYCLOPÉDIE ET MODALE ANATOMIQUE
+    // ==========================================
+    function renderTechniques() {
+      const grid = document.getElementById('encycloGrid');
+      grid.innerHTML = '';
+
+      DATASET.techniques.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-cyan-500/50 transition flex flex-col justify-between space-y-3';
+        card.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">${t.discipline}</span>
+              <span class="text-xs text-yellow-400">⚡ Puissance : ${t.puissance}/5</span>
+            </div>
+            <h4 class="font-bold font-hud text-base text-white">${t.nom}</h4>
+            <p class="text-xs text-slate-400 line-clamp-2">${t.mecanique_levier}</p>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+            <span class="text-[10px] font-mono text-slate-500">${t.distance}</span>
+            <button onclick="openTechModal('${t.id}')" class="text-xs px-3 py-1 rounded-lg bg-cyan-600/30 text-cyan-300 hover:bg-cyan-600 hover:text-white transition font-mono">
+              Fiche Anatomique →
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterTechniques() {
+      const query = document.getElementById('encycloSearch').value.toLowerCase();
+      const disc = document.getElementById('disciplineFilter').value;
+      const grid = document.getElementById('encycloGrid');
+      grid.innerHTML = '';
+
+      const filtered = DATASET.techniques.filter(t => {
+        const matchDisc = (disc === 'ALL' || t.discipline === disc);
+        const matchQuery = t.nom.toLowerCase().includes(query) ||
+                           t.discipline.toLowerCase().includes(query) ||
+                           (t.muscles_moteurs || []).some(m => m.toLowerCase().includes(query)) ||
+                           (t.cibles_anatomiques || []).some(c => c.toLowerCase().includes(query));
+        return matchDisc && matchQuery;
+      });
+
+      filtered.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-cyan-500/50 transition flex flex-col justify-between space-y-3';
+        card.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">${t.discipline}</span>
+              <span class="text-xs text-yellow-400">⚡ Puissance : ${t.puissance}/5</span>
+            </div>
+            <h4 class="font-bold font-hud text-base text-white">${t.nom}</h4>
+            <p class="text-xs text-slate-400 line-clamp-2">${t.mecanique_levier}</p>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+            <span class="text-[10px] font-mono text-slate-500">${t.distance}</span>
+            <button onclick="openTechModal('${t.id}')" class="text-xs px-3 py-1 rounded-lg bg-cyan-600/30 text-cyan-300 hover:bg-cyan-600 hover:text-white transition font-mono">
+              Fiche Anatomique →
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function openTechModal(techId) {
+      const t = DATASET.techniques.find(item => item.id === techId);
+      if (!t) return;
+
+      document.getElementById('modalDisciplineBadge').innerText = t.discipline;
+      document.getElementById('modalTitle').innerText = t.nom;
+      document.getElementById('modalSubTitle').innerText = `${t.nom_international || ''} • ${t.famille} • ${t.distance}`;
+      document.getElementById('modalLever').innerText = t.mecanique_levier;
+
+      const motorUl = document.getElementById('modalMotors');
+      motorUl.innerHTML = '';
+      (t.muscles_moteurs || []).forEach(m => {
+        const li = document.createElement('li'); li.innerText = m; motorUl.appendChild(li);
+      });
+
+      const targetUl = document.getElementById('modalTargets');
+      targetUl.innerHTML = '';
+      (t.cibles_anatomiques || []).forEach(c => {
+        const li = document.createElement('li'); li.innerText = c; targetUl.appendChild(li);
+      });
+
+      const flawUl = document.getElementById('modalFlaws');
+      flawUl.innerHTML = '';
+      (t.failles_biomecaniques || []).forEach(f => {
+        const li = document.createElement('li'); li.innerText = f; flawUl.appendChild(li);
+      });
+
+      const counterUl = document.getElementById('modalCounters');
+      counterUl.innerHTML = '';
+      (t.contres_recommandes || []).forEach(c => {
+        const li = document.createElement('li'); li.innerText = c; counterUl.appendChild(li);
+      });
+
+      const insepBox = document.getElementById('modalInsepBox');
+      const insepCont = document.getElementById('modalInsepContent');
+      if (t.donnees_insep) {
+        insepBox.classList.remove('hidden');
+        insepCont.innerHTML = `
+          Force Élite : <strong>${t.donnees_insep.force_elite_n} N</strong> • Vitesse : <strong>${t.donnees_insep.vitesse_ms} m/s</strong><br>
+          Angle coude : <strong>${t.donnees_insep.angle_coude_deg}°</strong> • Appui GRF : <strong>${t.donnees_insep.ratio_grf}</strong>
+        `;
+      } else {
+        insepBox.classList.add('hidden');
+      }
+
+      document.getElementById('techModal').classList.remove('hidden');
+    }
+
+    function closeTechModal() {
+      document.getElementById('techModal').classList.add('hidden');
+    }
+
+    // ==========================================
+    // FIGHT TIMER & COACH VOCAL (WEB AUDIO & SPEECH)
+    // ==========================================
+    let timerRunning = false;
+    let timerInterval = null;
+    let timerTotalSeconds = 180;
+    let timerSecondsLeft = 180;
+    let timerCurrentRound = 1;
+    let timerTotalRounds = 3;
+    let timerRestSeconds = 60;
+    let timerIsRest = false;
+    let voiceCoachEnabled = true;
+    let voiceCoachMode = 'combos';
+    let voiceInterval = null;
+
+    let activeCombosList = [
+      'Direct avant, Cross arrière, Esquive, Cross',
+      'Jab, Jab, Low kick intérieur',
+      'Crochet au foie, Uppercut au menton',
+      'Teep frontal, Feinte, Direct du droit'
+    ];
+
+    const calloutTargets = [
+      'FOIE !', 'MENTON !', 'LOW KICK !', 'TÊTE !', 'CORPS !', 'ESQUIVE ROTATIVE !'
+    ];
+
+    // Synthèse Sonore Web Audio API (Cloche Ring Laiton)
+    function playRingBell() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+
+        // Oscillateur principal cloche
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(659.25, now); // Mi (E5)
+        gain1.gain.setValueAtTime(0.7, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+
+        // Harmonique métallique
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(1244.5, now);
+        gain2.gain.setValueAtTime(0.4, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 2.5);
+        osc2.stop(now + 2.5);
+      } catch(e) {
+        console.warn('Web Audio indisponible:', e);
+      }
+    }
+
+    function playWoodClapper() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        for (let i = 0; i < 3; i++) {
+          const now = audioCtx.currentTime + i * 0.15;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(400, now);
+          gain.gain.setValueAtTime(0.5, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        }
+      } catch(e) {}
+    }
+
+    function speakText(txt) {
+      if (!voiceCoachEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(txt);
+      u.lang = 'fr-FR';
+      u.rate = 1.1;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+
+      const banner = document.getElementById('vocalOrderBanner');
+      if (banner) banner.innerText = `🗣️ Ordre du coach : "${txt}"`;
+    }
+
+    function toggleTimer() {
+      if (timerRunning) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    }
+
+    function startTimer() {
+      timerRunning = true;
+      requestWakeLock(); // Empêcher l'écran mobile de s'éteindre pendant le round
+      document.getElementById('timerToggleBtn').innerText = '⏸ PAUSE';
+      document.getElementById('timerToggleBtn').classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+      document.getElementById('timerToggleBtn').classList.add('bg-amber-600', 'hover:bg-amber-500');
+      
+      playRingBell();
+      speakText(timerIsRest ? 'Repos ! Récupérez.' : `Round ${timerCurrentRound} ! Combattez !`);
+
+      timerInterval = setInterval(() => {
+        timerSecondsLeft--;
+        updateTimerDisplay();
+
+        // Alerte 10 secondes cliquette
+        if (timerSecondsLeft === 10 && !timerIsRest) {
+          playWoodClapper();
+          speakText('Dix secondes ! Accélérez !');
+        }
+
+        if (timerSecondsLeft <= 0) {
+          playRingBell();
+          if (!timerIsRest) {
+            // Fin de round -> passage au repos
+            if (timerCurrentRound >= timerTotalRounds) {
+              // Fin du combat
+              pauseTimer();
+              speakText('Combat terminé ! Magnifique performance.');
+              document.getElementById('timerStatusText').innerText = 'Combat terminé !';
+              return;
+            } else {
+              timerIsRest = true;
+              timerSecondsLeft = timerRestSeconds;
+              speakText('Fin du round. Repos.');
+            }
+          } else {
+            // Fin du repos -> round suivant
+            timerIsRest = false;
+            timerCurrentRound++;
+            timerSecondsLeft = timerTotalSeconds;
+            speakText(`Round ${timerCurrentRound} ! C est parti !`);
+          }
+        }
+      }, 1000);
+
+      // Boucle d'annonces vocales régulières
+      startVoiceCoachLoop();
+    }
+
+    function pauseTimer() {
+      timerRunning = false;
+      releaseWakeLock(); // Relâcher le verrouillage d'écran
+      clearInterval(timerInterval);
+      clearInterval(voiceInterval);
+      document.getElementById('timerToggleBtn').innerText = '▶ REPRENDRE';
+      document.getElementById('timerToggleBtn').classList.remove('bg-amber-600', 'hover:bg-amber-500');
+      document.getElementById('timerToggleBtn').classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      timerCurrentRound = 1;
+      timerIsRest = false;
+      timerSecondsLeft = timerTotalSeconds;
+      updateTimerDisplay();
+      document.getElementById('timerToggleBtn').innerText = '▶ DÉMARRER LE ROUND';
+      document.getElementById('timerStatusText').innerText = 'Prêt pour le combat';
+    }
+
+    function setTimerPreset(preset) {
+      pauseTimer();
+      if (preset === 'boxe') {
+        timerTotalSeconds = 180; timerRestSeconds = 60; timerTotalRounds = 3;
+      } else if (preset === 'muay') {
+        timerTotalSeconds = 180; timerRestSeconds = 60; timerTotalRounds = 5;
+      } else if (preset === 'tabata') {
+        timerTotalSeconds = 20; timerRestSeconds = 10; timerTotalRounds = 8;
+      }
+      resetTimer();
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSecondsLeft / 60);
+      const s = timerSecondsLeft % 60;
+      document.getElementById('timerClock').innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+      document.getElementById('roundCounter').innerText = `Round : ${timerCurrentRound} / ${timerTotalRounds}`;
+
+      const box = document.getElementById('timerDisplayBox');
+      const badge = document.getElementById('timerPhaseBadge');
+
+      if (timerIsRest) {
+        badge.innerText = 'REPOS EN COURS';
+        badge.className = 'inline-block px-4 py-1.5 rounded-full bg-rose-500/20 text-rose-400 font-mono text-sm font-bold border border-rose-500/30';
+        box.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+        box.classList.remove('timer-warning-pulse');
+      } else {
+        badge.innerText = `ROUND ${timerCurrentRound} EN COURS`;
+        badge.className = 'inline-block px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-sm font-bold border border-emerald-500/30';
+        box.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+
+        if (timerSecondsLeft <= 10) {
+          box.classList.add('timer-warning-pulse');
+          badge.innerText = '10 SECONDES RESTANTES !';
+          badge.className = 'inline-block px-4 py-1.5 rounded-full bg-amber-500/30 text-amber-300 font-mono text-sm font-bold border border-amber-500/50';
+        } else {
+          box.classList.remove('timer-warning-pulse');
+        }
+      }
+    }
+
+    function startVoiceCoachLoop() {
+      clearInterval(voiceInterval);
+      if (!voiceCoachEnabled) return;
+
+      voiceInterval = setInterval(() => {
+        if (!timerRunning || timerIsRest) return;
+        if (voiceCoachMode === 'combos') {
+          const combo = activeCombosList[Math.floor(Math.random() * activeCombosList.length)];
+          speakText(combo);
+        } else {
+          const target = calloutTargets[Math.floor(Math.random() * calloutTargets.length)];
+          speakText(target);
+        }
+      }, 5000);
+    }
+
+    function toggleVoiceCoach(val) {
+      voiceCoachEnabled = val;
+      if (!val) window.speechSynthesis.cancel();
+      else if (timerRunning) startVoiceCoachLoop();
+    }
+
+    function setVoiceMode(mode) {
+      voiceCoachMode = mode;
+      document.getElementById('voiceModeCombos').className = mode === 'combos' ? 'flex-1 py-1.5 rounded-lg bg-cyan-600 text-white font-bold text-xs' : 'flex-1 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs';
+      document.getElementById('voiceModeCallout').className = mode === 'callout' ? 'flex-1 py-1.5 rounded-lg bg-cyan-600 text-white font-bold text-xs' : 'flex-1 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs';
+    }
+
+    function loadFighterIntoCoach(fighterKey) {
+      const fighterCombos = {
+        ali: ['Jab', 'Double Jab', 'Cross arrière', 'Esquive en reculant', 'Cross'],
+        tyson: ['Esquive gauche', 'Crochet au foie', 'Uppercut droit', 'Crochet gauche'],
+        buakaw: ['Teep d arrêt', 'Feinte de Teep', 'Low kick surpuissant', 'Coup de coude'],
+        gracie: ['Front kick de distance', 'Clinch sous aisselle', 'Takedown', 'Clé de bras Armbar'],
+        gsp: ['Jab d aveuglement', 'Changement de niveau', 'Double Leg Takedown', 'Frappes au sol']
+      };
+
+      if (fighterCombos[fighterKey]) {
+        activeCombosList = fighterCombos[fighterKey];
+        switchNav('timer');
+        setVoiceMode('combos');
+        speakText(`Combinaisons de légende chargées. Prêt pour l entraînement !`);
+      }
+    }
+
+    // ==========================================
+    // DOJO DE SPARRING VIRTUEL (QI COMBAT)
+    // ==========================================
+    const dojoScenarios = [
+      {
+        title: "Attaque en Overhand Plongeant Adverse",
+        description: "L adversaire déclenche un grand overhand du droit plongeant vers votre tempe gauche en engageant toute sa masse.",
+        options: [
+          { text: "A. Bloquer passivement avec la garde haute", correct: false, exp: "Le choc direct de 3 500 N traverse la garde et crée un déséquilibre arrière." },
+          { text: "B. Duck-under (esquive rotative sous le bras) et amenée au sol", correct: true, exp: "Parfait ! La trajectoire circulaire de l overhand offre un passage direct sous le centre de gravité adverse." },
+          { text: "C. Tenter un coup de pied sauté", correct: false, exp: "L appui instable en l air entraîne une collision cinétique fatale." }
+        ]
+      },
+      {
+        title: "Tentative d Amenée au Sol en Double Leg",
+        description: "L adversaire change subitement de niveau et plonge à pleine vitesse pour saisir vos deux genoux.",
+        options: [
+          { text: "A. Sprawl explosif hanches en arrière et pression sur la nuque", correct: true, exp: "Excellent ! Le recul des hanches dérobe les appuis et la masse de votre tronc écrase la pénétration adverse." },
+          { text: "B. Tenter un coup de poing direct en reculant", correct: false, exp: "La poussée axiale adverse pénètre sous votre ligne de frappe et vous renverse au sol." },
+          { text: "C. Attraper son dos avec les mains", correct: false, exp: "Sans défense des jambes, la projection au sol est inévitable." }
+        ]
+      },
+      {
+        title: "Défense sur Clé de Bras (Armbar) en Garde Fermée",
+        description: "L adversaire pivote ses hanches au sol et commence à passer sa jambe au-dessus de votre visage pour verrouiller le coude.",
+        options: [
+          { text: "A. Tirer de toutes ses forces en arrière en ligne droite", correct: false, exp: "L extension en ligne droite facilite l application du levier de classe 1 sur le coude." },
+          { text: "B. Empiler l adversaire (Stack pass) et tourner le pouce vers son corps", correct: true, exp: "Bravo ! L écrasement cervical empêche l extension de hanche et la rotation du bras libère l articulation." },
+          { text: "C. Se laisser tomber sur le côté", correct: false, exp: "Offre un angle de cassure idéal pour le combattant au sol." }
+        ]
+      }
+    ];
+
+    let currentDojoIdx = 0;
+    let dojoXp = 0;
+
+    function renderDojo() {
+      const card = document.getElementById('dojoCard');
+      const sc = dojoScenarios[currentDojoIdx];
+
+      card.innerHTML = `
+        <div class="space-y-2">
+          <div class="text-xs font-mono text-yellow-400 font-bold">SCÉNARIO #${currentDojoIdx + 1}</div>
+          <h3 class="text-xl font-bold font-hud text-white">${sc.title}</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">${sc.description}</p>
+        </div>
+
+        <div class="space-y-2 pt-2">
+          ${sc.options.map((opt, i) => `
+            <button onclick="answerDojo(${i})" class="w-full text-left p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-200 transition">
+              ${opt.text}
+            </button>
+          `).join('')}
+        </div>
+
+        <div id="dojoFeedback" class="hidden p-4 rounded-xl text-xs space-y-2"></div>
+      `;
+    }
+
+    function answerDojo(optIdx) {
+      const sc = dojoScenarios[currentDojoIdx];
+      const opt = sc.options[optIdx];
+      const fb = document.getElementById('dojoFeedback');
+      fb.classList.remove('hidden');
+
+      if (opt.correct) {
+        dojoXp += 100;
+        document.getElementById('dojoXpBadge').innerText = `${dojoXp} XP`;
+        fb.className = 'p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 space-y-2';
+        fb.innerHTML = `
+          <div class="font-bold flex items-center gap-2">✅ DÉCISION BIOMÉCANIQUE OPTIMALE (+100 XP)</div>
+          <p>${opt.exp}</p>
+          <button onclick="nextDojo()" class="px-4 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs">Scénario Suivant →</button>
+        `;
+      } else {
+        fb.className = 'p-4 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-200 space-y-2';
+        fb.innerHTML = `
+          <div class="font-bold flex items-center gap-2">❌ ERREUR TACTIQUE CRITIQUE</div>
+          <p>${opt.exp}</p>
+          <button onclick="renderDojo()" class="px-4 py-1.5 rounded-lg bg-slate-800 text-slate-200 text-xs">Réessayer</button>
+        `;
+      }
+    }
+
+    function nextDojo() {
+      currentDojoIdx = (currentDojoIdx + 1) % dojoScenarios.length;
+      renderDojo();
+    }
+
+    // Initialisation générale
+    window.addEventListener('DOMContentLoaded', () => {
+      resizeCanvas();
+      renderTechniques();
+      initDuelSelectors();
+      renderDojo();
+      updateTimerDisplay();
+    });
+  </script>
+</body>
+</html>
