@@ -1,8 +1,13 @@
 /**
  * Contrôleur JavaScript de la Grande Encyclopédie des Sports de Combat & Arts Martiaux
+ * Inclut la modale d'illustration visuelle pour :
+ * - Frappes Fondamentales
+ * - Clinch Et Projections
+ * - Défenses Et Blocages
  */
 
 import { ENCYCLOPEDIE_DATA } from './encyclopedie_dataset.js';
+import { TechniqueVisualEngine } from './technique_visuals.js';
 
 export class GrandEncyclopediaApp {
   constructor() {
@@ -12,7 +17,22 @@ export class GrandEncyclopediaApp {
     this.categorySelect = document.getElementById('categoryFilterSelect');
     this.modal = document.getElementById('disciplineDetailModal');
 
+    // Éléments de la modale d'illustration visuelle
+    this.techModal = document.getElementById('techniqueVisualModal');
+    this.techFamilyBadge = document.getElementById('techFamilyBadge');
+    this.techDisciplineBadge = document.getElementById('techDisciplineBadge');
+    this.techVisualTitle = document.getElementById('techVisualTitle');
+    this.techVisualTrad = document.getElementById('techVisualTrad');
+    this.techVisualDesc = document.getElementById('techVisualDesc');
+    this.techSvgContainer = document.getElementById('techSvgContainer');
+    this.techRealImgContainer = document.getElementById('techRealImgContainer');
+    this.techRealImgEl = document.getElementById('techRealImgEl');
+    this.techRealImgCaption = document.getElementById('techRealImgCaption');
+    this.tabVectorSvgBtn = document.getElementById('tabVectorSvgBtn');
+    this.tabRealImgBtn = document.getElementById('tabRealImgBtn');
+
     this.currentData = [...ENCYCLOPEDIE_DATA];
+    this.currentDiscipline = null;
 
     this.init();
   }
@@ -29,13 +49,35 @@ export class GrandEncyclopediaApp {
       this.categorySelect.addEventListener('change', () => this.filterData());
     }
 
-    // Gestion de la fermeture de la modale
+    // Gestion de la fermeture de la modale principale
     document.getElementById('closeDisciplineModalBtn')?.addEventListener('click', () => {
       this.closeModal();
     });
 
+    // Gestion de la fermeture de la modale d'illustration
+    document.getElementById('closeTechVisualBtn')?.addEventListener('click', () => {
+      this.closeTechModal();
+    });
+    document.getElementById('closeTechVisualBottomBtn')?.addEventListener('click', () => {
+      this.closeTechModal();
+    });
+
+    // Onglets Schéma Vectoriel / Image Réelle
+    this.tabVectorSvgBtn?.addEventListener('click', () => {
+      this.switchVisualTab('svg');
+    });
+    this.tabRealImgBtn?.addEventListener('click', () => {
+      this.switchVisualTab('real');
+    });
+
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') this.closeModal();
+      if (e.key === 'Escape') {
+        if (this.techModal && !this.techModal.classList.contains('hidden')) {
+          this.closeTechModal();
+        } else {
+          this.closeModal();
+        }
+      }
     });
   }
 
@@ -167,6 +209,8 @@ export class GrandEncyclopediaApp {
     const item = ENCYCLOPEDIE_DATA.find(d => d.id === id);
     if (!item || !this.modal) return;
 
+    this.currentDiscipline = item;
+
     document.getElementById('modalFlag').innerText = item.drapeau;
     document.getElementById('modalCategory').innerText = item.categorie;
     document.getElementById('modalTitle').innerText = item.nom;
@@ -204,7 +248,7 @@ export class GrandEncyclopediaApp {
       weaknessesUl.appendChild(li);
     });
 
-    // Nomenclature et techniques exhaustives
+    // Nomenclature et techniques exhaustives cliquables
     const techsContainer = document.getElementById('modalTechniquesContainer');
     techsContainer.innerHTML = '';
 
@@ -221,27 +265,155 @@ export class GrandEncyclopediaApp {
         .replace(/\b\w/g, l => l.toUpperCase());
 
       catBox.innerHTML = `
-        <h5 class="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
-          <span>🥋</span> ${friendlyTitle} (${techList.length})
-        </h5>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-          ${techList.map(t => `
-            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/80 space-y-0.5">
-              <div class="flex items-center justify-between gap-2">
-                <span class="font-bold text-xs text-white font-hud">${t.nom}</span>
-                ${t.trad ? `<span class="text-[10px] font-mono text-cyan-300/80 italic">${t.trad}</span>` : ''}
-              </div>
-              <p class="text-[11px] text-slate-400 leading-snug">${t.desc || ''}</p>
-            </div>
-          `).join('')}
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+          <h5 class="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+            <span>🥋</span> ${friendlyTitle} (${techList.length})
+          </h5>
+          <span class="text-[10px] font-mono text-slate-500 italic">Cliquez sur un élément pour voir l'image</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+          ${techList.map((t, idx) => {
+            const family = TechniqueVisualEngine.detectFamily(categoryName, t);
+            let badgeColor = 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+            let badgeLabel = 'Frappe Fondamentale';
+            let badgeIcon = '🥊';
+
+            if (family === 'clinch_projection') {
+              badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+              badgeLabel = 'Clinch & Projection';
+              badgeIcon = '🤼';
+            } else if (family === 'defense_blocage') {
+              badgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+              badgeLabel = 'Défense & Blocage';
+              badgeIcon = '🛡️';
+            }
+
+            return `
+              <button type="button" data-cat="${categoryName}" data-idx="${idx}" class="tech-card-btn text-left p-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-cyan-400 hover:bg-slate-850 transition-all duration-200 space-y-1.5 shadow group cursor-pointer active:scale-[0.98]">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-bold text-xs text-white font-hud group-hover:text-cyan-300 transition">${t.nom}</span>
+                  <span class="text-[9px] font-mono px-2 py-0.5 rounded border ${badgeColor} font-bold flex items-center gap-1 shrink-0">
+                    <span>${badgeIcon}</span> <span>${badgeLabel}</span>
+                  </span>
+                </div>
+                ${t.trad ? `<div class="text-[10px] font-mono text-cyan-300/80 italic">${t.trad}</div>` : ''}
+                <p class="text-[11px] text-slate-400 leading-snug line-clamp-2">${t.desc || ''}</p>
+                <div class="pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-cyan-400 group-hover:text-cyan-300">
+                  <span class="flex items-center gap-1 font-semibold"><span>👁️</span> Voir l'image biomécanique</span>
+                  <span class="transform group-hover:translate-x-1 transition font-bold">→</span>
+                </div>
+              </button>
+            `;
+          }).join('')}
         </div>
       `;
 
       techsContainer.appendChild(catBox);
     }
 
+    // Écouteurs de clic sur chaque élément de technique pour ouvrir l'image biomécanique
+    techsContainer.querySelectorAll('.tech-card-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const cat = btn.getAttribute('data-cat');
+        const idx = parseInt(btn.getAttribute('data-idx'), 10);
+        const techList = item.noms_et_techniques[cat];
+        if (techList && techList[idx]) {
+          this.openTechniqueVisual(cat, techList[idx], item);
+        }
+      });
+    });
+
     this.modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+  }
+
+  openTechniqueVisual(categoryName, tech, discipline) {
+    if (!this.techModal || !tech) return;
+
+    const family = TechniqueVisualEngine.detectFamily(categoryName, tech);
+    const realImg = TechniqueVisualEngine.getRealImagePath(tech);
+
+    // Badges et titres
+    if (family === 'clinch_projection') {
+      this.techFamilyBadge.className = 'text-[10px] sm:text-xs font-mono px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+      this.techFamilyBadge.innerText = '🤼 CLINCH ET PROJECTIONS';
+    } else if (family === 'defense_blocage') {
+      this.techFamilyBadge.className = 'text-[10px] sm:text-xs font-mono px-2.5 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+      this.techFamilyBadge.innerText = '🛡️ DÉFENSES ET BLOCAGES';
+    } else {
+      this.techFamilyBadge.className = 'text-[10px] sm:text-xs font-mono px-2.5 py-0.5 rounded-full font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+      this.techFamilyBadge.innerText = '🥊 FRAPPES FONDAMENTALES';
+    }
+
+    this.techDisciplineBadge.innerText = `${discipline.nom} (${discipline.origine_pays})`;
+    this.techVisualTitle.innerText = tech.nom;
+    this.techVisualTrad.innerText = tech.trad ? `Traduction : « ${tech.trad} »` : '';
+    this.techVisualDesc.innerText = tech.desc || 'Mouvement martial fondamental répertorié pour cette discipline.';
+
+    // Décomposition en 3 phases selon la famille
+    const phase1 = document.getElementById('techPhase1Text');
+    const phase2 = document.getElementById('techPhase2Text');
+    const phase3 = document.getElementById('techPhase3Text');
+    const targets = document.getElementById('techTargetsText');
+    const vigilance = document.getElementById('techVigilanceText');
+
+    if (family === 'clinch_projection') {
+      if (phase1) phase1.innerText = "Cadrage, fermeture de la distance et prise de grip (saisie de nuque, kimono ou contrôle sous les aisselles).";
+      if (phase2) phase2.innerText = "Abaissement du centre de gravité sous celui de l'adversaire ou cassure posturale axiale.";
+      if (phase3) phase3.innerText = "Poussée explosive d'épaule ou traction en bascule avec levier au sol terminal.";
+      if (targets) targets.innerText = "Centre de gravité, nuque, creux poplités, hanches ou articulations des bras/jambes.";
+      if (vigilance) vigilance.innerText = "Garder la tête collée au torse pour interdire les contre-guillotines et les coups de genou.";
+    } else if (family === 'defense_blocage') {
+      if (phase1) phase1.innerText = "Lecture anticipatoire de la trajectoire adverse et ancrage équilibré sur les appuis.";
+      if (phase2) phase2.innerText = "Décalage d'axe en U, montée de bouclier osseux (tibia/avant-bras) ou parade déviatrice courte.";
+      if (phase3) phase3.innerText = "Absorption de l'onde de force ou redirection complète laissant l'adversaire dans le vide.";
+      if (targets) targets.innerText = "Lignes d'attaque directes, circulaires ou plongeantes visant la tête et le foie.";
+      if (vigilance) vigilance.innerText = "Ne jamais fermer les yeux à l'impact et enchaîner immédiatement la riposte en sortie d'esquive.";
+    } else {
+      if (phase1) phase1.innerText = "Impulsion plantaire au sol (Ground Reaction Force) et armement élastique de la hanche.";
+      if (phase2) phase2.innerText = "Transmission séquentielle de la torsion pelvienne vers la ceinture scapulaire.";
+      if (phase3) phase3.innerText = "Extension terminale du membre percutant avec verrouillage articulaire à l'impact.";
+      if (targets) targets.innerText = "Menton, mâchoire, plexus solaire, foie, tempe ou cuisse (nerf sciatique).";
+      if (vigilance) vigilance.innerText = "Maintenir le poing opposé collé à la mâchoire et ramener le membre immédiatement après impact.";
+    }
+
+    // Rendu du SVG
+    if (this.techSvgContainer) {
+      this.techSvgContainer.innerHTML = TechniqueVisualEngine.renderSVG(family, tech);
+    }
+
+    // Gestion de l'image scientifique réelle
+    if (realImg) {
+      this.tabRealImgBtn.classList.remove('hidden');
+      this.techRealImgEl.src = realImg.path;
+      this.techRealImgCaption.innerText = realImg.title;
+      this.switchVisualTab('svg'); // Démarrer sur le schéma vectoriel par défaut
+    } else {
+      this.tabRealImgBtn.classList.add('hidden');
+      this.switchVisualTab('svg');
+    }
+
+    this.techModal.classList.remove('hidden');
+  }
+
+  switchVisualTab(type) {
+    if (type === 'real') {
+      this.techSvgContainer.classList.add('hidden');
+      this.techRealImgContainer.classList.remove('hidden');
+      this.tabRealImgBtn.className = 'px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold flex items-center gap-1.5';
+      this.tabVectorSvgBtn.className = 'px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 text-xs font-mono font-bold flex items-center gap-1.5';
+    } else {
+      this.techRealImgContainer.classList.add('hidden');
+      this.techSvgContainer.classList.remove('hidden');
+      this.tabVectorSvgBtn.className = 'px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold flex items-center gap-1.5';
+      this.tabRealImgBtn.className = 'px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 text-xs font-mono font-bold flex items-center gap-1.5';
+    }
+  }
+
+  closeTechModal() {
+    if (this.techModal) {
+      this.techModal.classList.add('hidden');
+    }
   }
 
   closeModal() {
