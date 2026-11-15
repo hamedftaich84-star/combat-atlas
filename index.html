@@ -108,8 +108,13 @@
         </div>
       </div>
 
-      <!-- Contrôles d'en-tête : Plein Écran & Statuts -->
+      <!-- Contrôles d'en-tête : Plein Écran, Grande Encyclopédie & Statuts -->
       <div class="flex items-center gap-2">
+        <a href="./encyclopedie.html" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-red-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-sm shadow-amber-500/10">
+          <span class="text-sm">📖</span>
+          <span class="hidden sm:inline font-hud tracking-wide">Grande Encyclopédie</span>
+          <span class="sm:hidden font-hud">Encyclopédie</span>
+        </a>
         <button id="fullscreenBtn" class="p-2 sm:px-3 sm:py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-mono flex items-center gap-1 transition active:scale-95" title="Plein Écran">
           <span id="fullscreenIcon">⛶</span>
           <span class="hidden md:inline">Plein Écran</span>
@@ -154,6 +159,9 @@
       <button id="nav-fighters" class="nav-btn px-3 py-2 rounded-t-lg border-b-2 border-transparent hover:text-cyan-400 text-slate-400 transition whitespace-nowrap">
         👑 Légendes
       </button>
+      <a href="./encyclopedie.html" class="px-3 py-2 rounded-t-lg border-b-2 border-amber-500/40 hover:text-amber-300 text-amber-400 bg-amber-500/10 font-semibold transition whitespace-nowrap flex items-center gap-1.5 ml-auto">
+        📖 Grande Encyclopédie des Arts (28+) ↗
+      </a>
     </nav>
   </header>
 
@@ -746,6 +754,10 @@
       <span class="text-lg">👑</span>
       <span class="truncate">Légendes</span>
     </button>
+    <a href="./encyclopedie.html" class="flex flex-col items-center justify-center p-1 text-amber-400 hover:text-amber-300 flex-1 text-[10px] active:scale-95 transition font-semibold">
+      <span class="text-lg">📖</span>
+      <span class="truncate">Arts (28+)</span>
+    </a>
   </nav>
 
   <!-- MODALE ANATOMIQUE DÉTAILLÉE -->

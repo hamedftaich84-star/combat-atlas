@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Grande Encyclopédie des Sports de Combat & Arts Martiaux</title>
+  
+  <!-- Métadonnées PWA & Mobile -->
+  <meta name="theme-color" content="#030712">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Encyclopédie exhaustive des sports de combat et arts martiaux : historique, points forts, faiblesses et liste complète des techniques et noms vernaculaires.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            hudCyan: '#00CED1',
+            hudOrange: '#FF6B35',
+            hudGreen: '#00E676',
+            hudYellow: '#FFD700',
+            hudPurple: '#9333EA'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #030712;
+      color: #F3F4F6;
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (min-width: 1024px) {
+      body {
+        padding-bottom: 0px;
+      }
+    }
+
+    .font-hud {
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px rgba(0, 206, 209, 0.35);
+    }
+    .glow-orange {
+      box-shadow: 0 0 25px rgba(255, 107, 53, 0.35);
+    }
+  </style>
+
+  <!-- Module JavaScript de l'Encyclopédie -->
+  <script type="module" src="./src/encyclopedie_page.js"></script>
+</head>
+<body class="min-h-[100dvh] flex flex-col bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-black">
+
+  <!-- En-tête Principal -->
+  <header class="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <a href="./index.html" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-600 to-rose-600 flex items-center justify-center font-hud text-lg sm:text-xl font-bold shadow-lg shadow-orange-500/30 shrink-0 hover:scale-105 transition" title="Retour à l'Atlas 3D">
+          📚
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-xl font-bold tracking-tight font-hud text-white truncate">GRANDE ENCYCLOPÉDIE</h1>
+            <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-bold border border-amber-500/30 shrink-0">MONDIALE</span>
+          </div>
+          <p class="text-[10px] sm:text-xs text-slate-400 hidden xs:block truncate">Historiques • Points Forts & Faiblesses • Nomenclatures Techniques Exhaustives</p>
+        </div>
+      </div>
+
+      <!-- Navigation & Retour au Laboratoire 3D -->
+      <div class="flex items-center gap-2">
+        <a href="./index.html" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-xs font-mono font-bold flex items-center gap-1.5 transition active:scale-95 shadow">
+          <span>🥊</span>
+          <span class="hidden sm:inline">Labo 3D & Timer</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Barre de Recherche & Filtres Rapides -->
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 border-t border-slate-800/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+      <div class="relative flex-1 max-w-md">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 text-sm">🔍</span>
+        <input type="text" id="globalSearchInput" placeholder="Rechercher nom, technique, pays, maître..." class="w-full bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-xl pl-9 pr-3 py-2 focus:border-cyan-400 focus:outline-none transition">
+      </div>
+
+      <div class="flex items-center gap-2">
+        <select id="categoryFilterSelect" class="bg-slate-950 border border-slate-700 text-xs text-cyan-300 rounded-xl px-3 py-2 focus:border-cyan-400 focus:outline-none">
+          <option value="ALL">Toutes les Familles Martiales</option>
+          <option value="Striking">Arts de Percussion (Striking)</option>
+          <option value="Grappling">Arts de Préhension (Grappling)</option>
+          <option value="Hybride">Arts Mixtes & Hybrides (MMA / Krav Maga)</option>
+        </select>
+        <span id="disciplinesCountBadge" class="hidden md:inline-block px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 font-mono text-xs font-bold whitespace-nowrap">
+          ... Disciplines
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENU PRINCIPAL : GRILLE DES DISCIPLINES -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
+    <div id="encycloListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <!-- Rempli dynamiquement par encyclopedie_page.js -->
+    </div>
+  </main>
+
+  <!-- BARRE DE NAVIGATION INFÉRIEURE FIXE (Mobile Bottom Nav) -->
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 border-t border-slate-800 backdrop-blur z-50 flex items-center justify-around px-2 py-2 shadow-2xl safe-area-bottom">
+    <a href="./index.html" class="flex flex-col items-center justify-center p-1 text-slate-400 flex-1 text-[10px] active:scale-95 transition">
+      <span class="text-xl">🥊</span>
+      <span class="truncate">Labo 3D</span>
+    </a>
+    <a href="./index.html#timer" class="flex flex-col items-center justify-center p-1 text-slate-400 flex-1 text-[10px] active:scale-95 transition">
+      <span class="text-xl">⏱️</span>
+      <span class="truncate">Fight Timer</span>
+    </a>
+    <a href="./encyclopedie.html" class="flex flex-col items-center justify-center p-1 text-cyan-400 font-bold flex-1 text-[10px] active:scale-95 transition">
+      <span class="text-xl">📚</span>
+      <span class="truncate">Encyclopédie</span>
+    </a>
+  </nav>
+
+  <!-- MODALE IMMERSIVE : DOSSIER CLINIQUE & NOMENCLATURE EXHAUSTIVE -->
+  <div id="disciplineDetailModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-4xl w-full p-4 sm:p-8 space-y-6 max-h-[92vh] overflow-y-auto shadow-2xl">
+      
+      <!-- En-tête Modale -->
+      <div class="flex items-start justify-between border-b border-slate-800 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="modalFlag" class="text-3xl"></span>
+            <span id="modalCategory" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30"></span>
+          </div>
+          <h2 id="modalTitle" class="text-2xl sm:text-3xl font-bold font-hud text-white mt-1"></h2>
+          <p id="modalOriginalTitle" class="text-xs sm:text-sm text-slate-400 font-mono"></p>
+        </div>
+        <button id="closeDisciplineModalBtn" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xl font-bold transition active:scale-95">✕</button>
+      </div>
+
+      <!-- Corps du Dossier -->
+      <div class="space-y-6 text-xs sm:text-sm">
+        
+        <!-- Fondateurs & Maîtres -->
+        <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+          <div class="font-bold text-amber-400 font-mono text-xs uppercase tracking-wider">Maitres Fondateurs & Figures Emblématiques</div>
+          <p id="modalMasters" class="text-slate-300 font-mono text-xs"></p>
+        </div>
+
+        <!-- Historique & Genèse -->
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5">
+          <h4 class="font-bold text-cyan-400 font-mono text-xs uppercase tracking-wider flex items-center gap-2">
+            <span>📜</span> HISTORIQUE, ORIGINES & ÉVOLUTION
+          </h4>
+          <p id="modalHistoryText" class="text-slate-300 leading-relaxed text-xs sm:text-sm"></p>
+        </div>
+
+        <!-- Philosophie & Biomécanique -->
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5">
+          <h4 class="font-bold text-yellow-400 font-mono text-xs uppercase tracking-wider flex items-center gap-2">
+            <span>⚖️</span> PHILOSOPHIE DU COMBAT & PRINCIPES BIOMÉCANIQUES
+          </h4>
+          <p id="modalPhilosophyText" class="text-slate-300 leading-relaxed text-xs sm:text-sm"></p>
+        </div>
+
+        <!-- Points Forts & Faiblesses (2 colonnes) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/40 space-y-2">
+            <h4 class="font-bold text-emerald-400 font-mono text-xs uppercase tracking-wider flex items-center gap-2">
+              <span>🛡️</span> POINTS FORTS & ATOUTS DÉCISIONNELS
+            </h4>
+            <ul id="modalStrengthsUl" class="space-y-1.5 text-xs"></ul>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-rose-950/20 border border-rose-500/40 space-y-2">
+            <h4 class="font-bold text-rose-400 font-mono text-xs uppercase tracking-wider flex items-center gap-2">
+              <span>⚠️</span> FAIBLESSES, ANGLES MORTS & RESTRICTIONS
+            </h4>
+            <ul id="modalWeaknessesUl" class="space-y-1.5 text-xs"></ul>
+          </div>
+        </div>
+
+        <!-- Nomenclature Exhaustive des Noms et Techniques -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h4 class="font-bold text-white font-hud text-base flex items-center gap-2">
+              <span>🥋</span> NOMENCLATURE EXHAUSTIVE DES NOMS & TECHNIQUES
+            </h4>
+            <span class="text-[11px] font-mono text-slate-400">Noms vernaculaires & traductions</span>
+          </div>
+          <div id="modalTechniquesContainer" class="space-y-3">
+            <!-- Rempli dynamiquement -->
+          </div>
+        </div>
+
+        <!-- Bouton retour vers Labo 3D -->
+        <div class="pt-4 border-t border-slate-800 flex justify-end">
+          <a href="./index.html" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold font-hud text-xs transition flex items-center gap-2 shadow-lg">
+            <span>🥊</span> Tester les frappes dans le Laboratoire 3D →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
