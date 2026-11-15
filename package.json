@@ -1,0 +1,22 @@
+{
+  "name": "combat-atlas",
+  "version": "3.5.0",
+  "description": "Atlas Biomécanique & Tactique des Arts Martiaux - Application JavaScript modulaire pour PC et Mobile",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx vite"
+  },
+  "keywords": [
+    "biomecanique",
+    "arts-martiaux",
+    "insep",
+    "kickboxing",
+    "mocap-3d",
+    "fight-timer",
+    "tactique"
+  ],
+  "author": "hamedftaich84-star",
+  "license": "MIT"
+}

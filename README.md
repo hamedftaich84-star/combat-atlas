@@ -1,67 +1,78 @@
-# Atlas Biomécanique & Tactique des Arts Martiaux 3.5 (PC & Mobile)
+# Atlas Biomécanique & Tactique des Arts Martiaux (JavaScript ES6)
 
-Plateforme web interactive et scientifique dédiée à la modélisation cinématique, biomécanique et tactique des arts martiaux et sports de combat.
-
----
-
-## 🌟 Présentation Générale
-
-L'**Atlas Biomécanique & Tactique** rassemble dans une interface unifiée :
-1. **Un Moteur Cinématique 3D Séquentiel** : Modélisation volumétrique avec 6 caméras préconfigurées (Zénithale, Derrière, Gauche, Droite, Face, Isométrique) et décomposition pas-à-pas en 6 étapes ($0\%$ à $100\%$) pour visualiser la naissance, le déploiement et la diffusion des forces.
-2. **Les Études Scientifiques INSEP REVEA (*Dr Daniel Dinu, HAL-05556088v1*)** : Captures cinématiques à 240 Hz par 17 UMI Xsens, données comparatives Élite vs Junior ($3\,158\text{ N}$ vs $1\,021\text{ N}$, vitesse $8,4\text{ m/s}$, angle optimal de coude $112,9^\circ$, ratio GRF $60,6\% / 39,4\%$, double pic sEMG de cocontraction $\Delta t \approx 18\text{ ms}$).
-3. **L'Analyse Biomécanique du Kickboxing (*Votre EPS*)** : Théorie de la masse effective ($m_{\text{eff}} \approx 32\text{ kg}$), pivot avant-pied ($90^\circ-180^\circ$) et prévention des lésions du ligament croisé antérieur (LCA).
-4. **Une Base de Données Relationnelle JSON v2.0** : 10 disciplines et 18 techniques fondamentales (Boxe, Muay-Thaï, Savate, Sambo, Wing Chun, Judo, Karaté, JJB, Lutte, MMA) avec fiches anatomiques complètes.
-5. **Un Simulateur de Duel Tactique (A vs B)** : Calcul automatique de l'interaction cinétique, des failles exploitées et de l'avantage décisionnel entre deux techniques.
-6. **Un Fight Timer & Coach Vocal Interactif** : Sons de cloche harmoniques en laiton (Web Audio API), synthèse vocale native (`window.speechSynthesis`) avec annonces de combinaisons et cibles impulsives (*Target Callout*), ergonomie haute visibilité (3 à 5 mètres) et maintien de l'écran allumé (*Screen WakeLock API*).
-7. **Un Dojo de Sparring Virtuel** : Quiz décisionnel interactif sous stress avec score de réflexe et feedback biomécanique immédiat.
-8. **L'Étude des Légendes (Fighter Studies)** : Fiches tactiques de Muhammad Ali, Mike Tyson, Buakaw Banchamek, Royce Gracie et Georges St-Pierre, avec chargement direct de leurs combinaisons dans le coach vocal.
+Application web modulaire **100% JavaScript (ES Modules)** dédiée à la modélisation cinématique, biomécanique et tactique des arts martiaux et sports de combat.
 
 ---
 
-## 📱 & 🖥️ Support Multi-Plateforme (PC & Téléphone)
+## 🚀 Architecture Modulaire JavaScript
 
-* **Sur PC Desktop / Laptop** :
-  * Contrôle orbital tridimensionnel à la souris.
-  * Raccourcis clavier pro : <kbd>Espace</kbd> (Pause/Lecture 3D), <kbd>1</kbd> à <kbd>6</kbd> (Phases), <kbd>C</kbd> (Cycle caméras), <kbd>T</kbd> (Fight Timer), <kbd>R</kbd> (Réinitialiser), <kbd>Échap</kbd> (Fermer modale).
-* **Sur Téléphone Mobile (Smartphone & Tablette)** :
-  * Barre de navigation tactile inférieure (*Bottom Nav*) accessible d'un seul pouce.
-  * Gestes multi-touch sur le modèle 3D : 1 doigt pour faire orbiter la vue, 2 doigts (*pinch-to-zoom*) pour zoomer.
-  * Maintien automatique de l'écran allumé pendant les entraînements (*Screen WakeLock API*).
-  * Déverrouillage automatique du son Web Audio sur premier toucher pour iOS (Safari) et Android (Chrome).
-  * Rendu Retina haute définition adapté au ratio de pixels (`devicePixelRatio`).
+L'application a été entièrement conçue et découpée en modules JavaScript modernes (`ES Modules` / `type="module"`) sans dépendances lourdes, nativement exécutables dans tous les navigateurs et déployables en un clic sur **GitHub Pages** :
 
----
-
-## 📁 Architecture des Fichiers
-
-```
-public/combat-atlas/
-├── index.html                           # Application unifiée autonome (HTML5, Tailwind CSS, Canvas 3D)
-├── techniques_combat_dataset.json       # Jeu de données relationnel des 18 techniques
-├── README.md                            # Documentation complète du module
-└── images/                              # Ressources visuelles HD extraites de l'INSEP et Votre EPS
-    ├── insep_boxeur_cross.png           # Avatar 3D Direct INSEP
-    ├── insep_boxeur_hook.png            # Avatar 3D Crochet INSEP
-    ├── insep_boxeur_uppercut.png        # Avatar 3D Uppercut INSEP
-    ├── insep_page13_hd.png              # Planche comparative haute définition INSEP
-    ├── figure1_insep.jpeg               # Graphe Force & Vitesse Élite vs Junior
-    ├── figure2_insep.jpeg               # Graphe de Corrélation Force-Vitesse
-    ├── figure3_insep.jpeg               # Données cinématiques
-    ├── insep_avatars_all.png            # Ensemble des postures d'impact
-    └── votreeps_planche_biomecanique.png# Planche biomécanique officielle Votre EPS
+```text
+combat-atlas/
+├── index.html                   # Point d'entrée HTML5 léger (<script type="module" src="./src/app.js">)
+├── package.json                 # Configuration du projet JavaScript
+├── README.md                    # Documentation complète
+├── src/
+│   ├── app.js                   # Orchestrateur central, routage d'onglets, raccourcis PC & plein écran
+│   ├── dataset.js               # Base de données relationnelle (10 disciplines / 18 techniques fondamentales)
+│   ├── engine3d.js              # Moteur Canvas 3D volumétrique, caméras, HUD Votre EPS, Mocap 60 fps
+│   ├── timer.js                 # Fight Timer, synthèse Web Audio API en laiton, SpeechSynthesis, WakeLock
+│   ├── duel.js                  # Simulateur de duel tactique interactif (A vs B) et collision cinétique
+│   ├── encyclopedia.js          # Grille réactive, recherche plein texte et modale anatomique détaillée
+│   ├── dojo.js                  # Dojo de sparring virtuel (QI de combat) et jauge d'expérience XP
+│   └── fighters.js              # Fiches des 5 légendes (Ali, Tyson, Buakaw, Gracie, GSP) et injection vocale
+└── images/                      # Illustrations et captures scientifiques haute résolution
+    ├── insep_boxeur_cross.png   # Avatar 3D Direct INSEP
+    ├── insep_boxeur_hook.png    # Avatar 3D Crochet INSEP
+    ├── insep_boxeur_uppercut.png# Avatar 3D Uppercut INSEP
+    ├── insep_page13_hd.png      # Planche comparative INSEP
+    ├── figure1_insep.jpeg       # Graphes de force et vitesse Élite vs Junior
+    ├── figure2_insep.jpeg       # Corrélation force-vitesse
+    ├── figure3_insep.jpeg       # Données cinématiques
+    ├── insep_avatars_all.png    # Planche des postures d'impact
+    └── votreeps_planche_biomecanique.png # Planche biomécanique Votre EPS
 ```
 
 ---
 
-## 🚀 Utilisation & Déploiement
+## 🌟 Fonctionnalités Implémentées en JavaScript
 
-### En Local avec Vite
-Lorsque le serveur de développement tourne :
+1. **Moteur 3D Haute Résolution (`engine3d.js`)** :
+   * Rendu Canvas matriciel pur sans WebGL lourd, auto-adapté aux écrans Retina (`window.devicePixelRatio`).
+   * 6 caméras sphériques et orbite libre à $360^\circ$.
+   * Découpage séquentiel en 6 étapes ($0\%$ à $100\%$) pour observer la naissance (GRF sol), le déploiement (torsion de hanche/buste) et la diffusion des forces (cocontraction terminale $\Delta t \approx 18\text{ ms}$).
+   * Calques HUD conformes à la charte *Votre EPS* : Squelette Mocap cyan (`#00CED1`), vecteurs de force orange (`#FF6B35`), polygone de sustentation vert (`#00E676`) et centre de masse $CoM$ en 4 quadrants.
+2. **Fight Timer & Synthétiseur Audio (`timer.js`)** :
+   * Synthèse harmonique de cloche de ring en laiton et cliquette en bois via la **Web Audio API** native.
+   * Annonces vocales en temps réel (`window.speechSynthesis`) en mode Combinaisons et mode *Target Callout* (« FOIE ! », « MENTON ! », « LOW KICK ! »).
+   * Maintien automatique de l'écran mobile allumé via la **Screen WakeLock API**.
+3. **Simulateur de Duel Tactique (`duel.js`)** :
+   * Calcul d'interaction géométrique et cinétique entre n'importe quelle paire de techniques.
+   * Détection des failles exploitées et calcul de l'avantage décisionnel en direct.
+4. **Encyclopédie Martiale (`encyclopedia.js` & `dataset.js`)** :
+   * 18 techniques et 10 disciplines (Boxe, Muay-Thaï, Savate, Sambo, Wing Chun, Judo, Karaté, JJB, Lutte, MMA).
+   * Recherche instantanée et fiches anatomiques modales avec données INSEP REVEA (*Dr Daniel Dinu*).
+5. **Dojo Virtuel (`dojo.js`)** :
+   * Entraînement au réflexe décisionnel sous agression avec calcul de points d'expérience (XP).
+6. **Légendes du Combat (`fighters.js`)** :
+   * Fiches biomécaniques de Muhammad Ali, Mike Tyson, Buakaw Banchamek, Royce Gracie et Georges St-Pierre, avec bouton d'injection directe de leurs combinaisons fétiches dans le coach vocal.
+
+---
+
+## 💻 Démarrage Local
+
 ```bash
-npm run dev
-```
-Accédez à l'application via :
-`http://localhost:5173/combat-atlas/`
+# Avec n'importe quel serveur HTTP statique (ex. serve, http-server, Vite)
+npx serve .
 
-### Double-clic direct (Hors-ligne)
-L'application est 100% autonome et sans dépendances lourdes : double-cliquez simplement sur `index.html` pour l'ouvrir dans n'importe quel navigateur moderne.
+# Ou avec Vite
+npx vite
+```
+
+---
+
+## 🌐 Déploiement en Ligne (GitHub Pages)
+
+Le projet est configuré pour être servi directement à la racine de la branche `main` sur GitHub Pages :  
+🔗 **[https://hamedftaich84-star.github.io/combat-atlas/](https://hamedftaich84-star.github.io/combat-atlas/)**
